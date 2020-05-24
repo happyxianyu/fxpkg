@@ -3,14 +3,11 @@ tmp/*
 *.tmp.txt
 *.tmp.py
 *.tmp.ipynb
-*.tmp.cpp
-*.tmp.hpp
-*.tmp.cxx
-*.tmp.c
 draft*
 
 .vscode/*
 build/*
+/src/test/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

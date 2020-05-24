@@ -1,4 +1,4 @@
-from libhost import LibHost
+from .libhost import LibHost
 basic_config_field = ['cache_dir' , 'src_dir', 'build_dir', 'tool_dir', 'install_dir']
 class PackageConfig:
     def __init__(self):

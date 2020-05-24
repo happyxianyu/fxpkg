@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from util import *
+from .util import *
 from functools import reduce
 import pickle
 

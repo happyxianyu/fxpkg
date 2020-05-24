@@ -1,5 +1,5 @@
-from libinfo_repo import LibInfoRepo
-from util import Path
+from .libinfo_repo import LibInfoRepo
+from .util import Path
 
 class LibHost:
     def __init__(self, workdir = 'libinfo'):

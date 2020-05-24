@@ -1,2 +1,2 @@
-from libinfo_repo import *
-from util import *
+from .libinfo_repo import *
+from .util import *

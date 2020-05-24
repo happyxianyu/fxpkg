@@ -1,4 +1,4 @@
-from mylib import Path
+from cbutil import Path
 from collections import namedtuple
 from itertools import product as cart_prod
 import re
@@ -59,3 +59,4 @@ def cart_prod_dict(d:dict) -> list:
         vals.append(v)
     vals1 = tuple(cart_prod(*vals))
     return [{k:v for k,v in zip(keys,vals1[i])} for i in range(len(vals1))] 
+
