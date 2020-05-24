@@ -1,5 +1,5 @@
 from .libhost import LibHost
-basic_config_field = ['cache_dir' , 'src_dir', 'build_dir', 'tool_dir', 'install_dir']
+basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path']
 class PackageConfig:
     def __init__(self):
         self._data = dict.fromkeys(basic_config_field)
@@ -13,13 +13,18 @@ class PackageConfig:
 
 class Package:
     def __init__(self, host:LibHost):
-        pass
+        self.host = host
 
-    def get_config(self, config:PackageConfig):
-        pass
+    def get_config(self, config:PackageConfig, option = 'common'):
+        '''Options:
+        common
+        agreesive
+        conservative
+        '''
+        return config
 
-    def begin(self, config:dict):
-        pass
+    def begin(self, config:PackageConfig):
+        self.config = config
 
     def download(self):
         pass
