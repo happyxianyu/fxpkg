@@ -1,5 +1,5 @@
 from .libhost import LibHost
-basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path']
+basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path', 'tmp_path']
 class PackageConfig:
     def __init__(self):
         self._data = dict.fromkeys(basic_config_field)
