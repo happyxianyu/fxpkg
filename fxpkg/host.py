@@ -1,10 +1,10 @@
-from .libinfo_repo import LibRepo
+from .librepo import LibRepo
 from .util import Path
 
 class FxpkgHost:
     def __init__(self, root_path = 'pkg_root'):
-        self.workpath = workpath = Path(root_path)
-        self.repo = LibRepo(workpath/'data')
+        self.root_path = root_path = Path(root_path)
+        self.repo = LibRepo(root_path/'install_info')
 
     def install_dependency(self, dependency):
         pass
