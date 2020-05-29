@@ -7,7 +7,6 @@ draft*
 
 .vscode/*
 build/*
-/src/test/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
