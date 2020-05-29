@@ -33,7 +33,8 @@ class Package:
         self.host = host
 
     def get_config(self, config:PackageConfig, option = 'common'):
-        '''Options:
+        '''
+        Options:
         common
         agreesive
         conservative
@@ -46,6 +47,9 @@ class Package:
     def download(self):
         pass
 
+    def extract_src(self):
+        pass
+
     def build(self):
         pass
 
@@ -54,9 +58,6 @@ class Package:
 
     def end(self) -> PackageInfo:
         '''return information'''
-        pass
-
-    def is_latest(self) -> bool:
         pass
 
 __all__ = ['PackageConfig', 'PackageInfo', 'Package']

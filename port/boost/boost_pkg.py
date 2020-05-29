@@ -4,6 +4,7 @@ from string import Template
 import sys
 import subprocess as subproc
 from functools import partial
+from fxpkg import Package
 
 open_console = partial(subproc.Popen,args = ['cmd'], stdin = subproc.PIPE, stdout = sys.stdout, shell =True, text = True)
 
@@ -19,13 +20,7 @@ def get_url(version):
     url = f'https://dl.bintray.com/boostorg/release/{version}/source/boost{name_suffix}.zip'
     return url
 
-class MainPkg:
-    def __init__(self, host):
-        self.host = host
-
-    def proc_config(self, config, option = 'common'):
-        return config
-
+class MainPkg(Package):
     def begin(self, config):
         self.config = config
         self.download_path = Path(self.config.download_path)
@@ -37,7 +32,7 @@ class MainPkg:
         self.download_url = url = URL(get_url('1.73'))
         self.download_file_path = self.download_path/url.name
 
-    def download_src(self):
+    def download(self):
         self.download_url.download(self.download_file_path, continuous=True)
 
     def extract_src(self):
@@ -65,7 +60,4 @@ class MainPkg:
 
     def end(self):
         '''return information'''
-        pass
-
-    def is_latest(self) -> bool:
         pass

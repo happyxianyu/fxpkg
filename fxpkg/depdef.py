@@ -1,3 +1,7 @@
+'''
+For defining dependency
+'''
+
 def all_(*args):
     return ('all', *args)
 
