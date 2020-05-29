@@ -1,0 +1,3 @@
+cd $src_path
+call .\bootstrap.bat
+call .\b2 install --prefix=$install_path --exec-prefix=$install_path\exec --libdir=$lib_path --includedir=$inc_path --cmakedir=$cmake_path address-model=64 > build_log.txt

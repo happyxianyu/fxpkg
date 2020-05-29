@@ -1,18 +1,35 @@
-from .libhost import LibHost
+from .host import FxpkgHost
 basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path', 'tmp_path']
-class PackageConfig:
-    def __init__(self):
-        self._data = dict.fromkeys(basic_config_field)
+
+
+class DictWrapClass:
+    def __init__(self, *args, **kwargs):
+        super().__setattr__('_data', dict(*args,**kwargs))
     
-    def __getattribute__(self, x):
+    def __getattr__(self, x):
         return self._data[x]
 
     def __setattr__(self,a,v):
         self._data[a] = v
 
+    def get_dict(self):
+        return self._data
+
+class PackageConfig(DictWrapClass):
+    '''
+    Config is for installing
+    Provided by host as input
+    '''
+
+class PackageInfo(DictWrapClass):
+    '''
+    Info is for storing
+    Provided by package as return value
+    '''
+
 
 class Package:
-    def __init__(self, host:LibHost):
+    def __init__(self, host:FxpkgHost):
         self.host = host
 
     def get_config(self, config:PackageConfig, option = 'common'):
@@ -35,9 +52,11 @@ class Package:
     def install(self):
         pass
 
-    def end(self) -> dict:
+    def end(self) -> PackageInfo:
         '''return information'''
         pass
 
     def is_latest(self) -> bool:
         pass
+
+__all__ = ['PackageConfig', 'PackageInfo', 'Package']

@@ -1,0 +1,17 @@
+[
+    {
+        "author" : {
+            "public key" : "base64",
+            "DSA" : "DSA name",
+            "name" : "author name"
+        },
+
+        "package" : {
+            "name" : "package name",
+            "description" : "short description",
+            "version" : "0.0.0",
+            "port publish date" : "2020-1-1",
+            "signature" : "base64"
+        }
+    }
+]
