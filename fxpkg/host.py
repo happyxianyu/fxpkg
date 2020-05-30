@@ -1,5 +1,7 @@
+from cbutil import load_module
+
 from .librepo import LibRepo
-from .util import Path
+from .path import Path
 
 class FxpkgHost:
     def __init__(self, root_path = 'pkg_root'):

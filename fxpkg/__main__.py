@@ -1,4 +1,4 @@
-from .util import Path
+from .path import Path
 
 self_path = Path(__file__)
 

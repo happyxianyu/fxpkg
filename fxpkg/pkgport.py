@@ -1,32 +1,18 @@
 from .host import FxpkgHost
+from .DirectDict import DirectDict
 basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path', 'tmp_path']
 
-
-class DictWrapClass:
-    def __init__(self, *args, **kwargs):
-        super().__setattr__('_data', dict(*args,**kwargs))
-    
-    def __getattr__(self, x):
-        return self._data[x]
-
-    def __setattr__(self,a,v):
-        self._data[a] = v
-
-    def get_dict(self):
-        return self._data
-
-class PackageConfig(DictWrapClass):
+class PackageConfig(DirectDict):
     '''
     Config is for installing
     Provided by host as input
     '''
 
-class PackageInfo(DictWrapClass):
+class PackageInfo(DirectDict):
     '''
     Info is for storing
     Provided by package as return value
     '''
-
 
 class Package:
     def __init__(self, host:FxpkgHost):

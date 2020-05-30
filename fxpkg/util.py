@@ -1,4 +1,3 @@
-from cbutil import Path
 from collections import namedtuple
 from itertools import product as cart_prod
 import re
