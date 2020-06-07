@@ -1,10 +1,12 @@
-import sys
-from cbutil import load_module, Path
-
+from cbutil import Path
 tmp_path = Path(r'D:\temp')
-main_path = tmp_path/'main.py'
 
-m = load_module(main_path)
-print(m)
 
-m.foo()
+# from fxpkg import init_fxpkg_root
+# root_path = tmp_path/'pkg_root'
+# init_fxpkg_root(root_path)
+
+
+import sys
+
+(tmp_path/'a.txt').copy_to(tmp_path/'b')

@@ -40,7 +40,7 @@ def canonicalize_data(x):
     return str(x)
 
 class LibRepo:
-    def __init__(self, data_path = 'lib_data', debug = False, reinit = False):
+    def __init__(self, data_path = 'install_info', debug = False, reinit = False):
         dbname = 'librepo.db'
         dp = Path(data_path) #dp = data_path
         db_path = dp/dbname
