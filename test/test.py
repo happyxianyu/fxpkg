@@ -1,12 +1,14 @@
 from cbutil import Path
 tmp_path = Path(r'D:\temp')
-
-
-# from fxpkg import init_fxpkg_root
-# root_path = tmp_path/'pkg_root'
-# init_fxpkg_root(root_path)
-
-
 import sys
+sys.path.insert(0,Path.getcwd())
 
-(tmp_path/'a.txt').copy_to(tmp_path/'b')
+from fxpkg import init_fxpkg_root
+from fxpkg import FxpkgHost
+import importlib
+
+root = init_fxpkg_root(tmp_path,is_prefix=True, overwrite=True)
+host = FxpkgHost(root)
+print(host.port.__path__)
+host.get_port('boost')
+
