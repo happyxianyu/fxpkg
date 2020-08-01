@@ -5,6 +5,7 @@ tmp/*
 *.tmp.ipynb
 draft*
 
+.vscode*
 .vscode/*
 build/*
 
