@@ -1,70 +1,30 @@
 from .fxhost import FxpkgHost
+from .datacls import PortInfo, LibConfig
 from .util import DirectDict
-from dataclasses import dataclass
 
 
-basic_config_field = ['cache_path' , 'src_path', 'build_path', 'tool_path', 'install_path', 'tmp_path']
+class FxPort:
+    info:PortInfo = PortInfo(name = 'None')
 
-
-@dataclass
-class PkgConfig(DirectDict):
-    '''
-    build option
-    '''
-    arch:str = 'x64'
-    build_type:str = 'debug'
-    platform:str = 'windows'
-    version:str = None
-
-    inc_path:str = None
-    lib_path:str = None
-    bin_path:str = None
-    cmake_path:str = None
-
-    use_exist_target:bool = True   
-    #if this is true and there is existed installed target, package will not build it again.
-
-    # extra:DirectDict = None
-    # #provided by package
-
-
-@dataclass
-class PkgInfo(DirectDict):
-    '''
-    Describe basic package info
-    '''
-    name:str
-    
-
-class FxPackage:
-    def __init__(self, host:FxpkgHost):
+    def __init__(self, host: FxpkgHost):
         self.host = host
+        self.port_config = host.make_port_config(self)
+        self.init()
 
-    def get_extra_config(self, option = 'common') -> DirectDict:
-        '''
-        Options:
-        common
-        agreesive
-        conservative
-        '''
-
-    def begin(self, config):
-        self.config = config
-
-    def download(self):
+    def init(self):
         pass
 
-    def extract_src(self):
-        pass
+    def make_default_libconfig(self, config: LibConfig = None) ->LibConfig:
+        return config
 
-    def build(self):
-        pass
+    def complete_libconfig(self, config: LibConfig) ->LibConfig:
+        self.host.complete_libconfig(config,self)
+        return config
 
-    def install(self):
-        pass
+    def install(self, config: LibConfig):
+        '''return lib info'''
+        return None
 
-    def end(self):
-        '''return information'''
-        pass
 
-__all__ = ['FxPackage']
+
+__all__ = ['FxPort']

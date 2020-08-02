@@ -59,3 +59,16 @@ def cart_prod_dict(d:dict) -> list:
     vals1 = tuple(cart_prod(*vals))
     return [{k:v for k,v in zip(keys,vals1[i])} for i in range(len(vals1))] 
 
+
+def update_dict_if_none(dst:dict, src:dict):
+    for k,v in src.items():
+        dstv = dst.get(k)
+        if dstv != None:
+            dst[k] = v
+
+
+def setattr_by_dict(dst:object, src:dict, cond = None):
+    for k, v in src.items():
+        if (not cond) or cond(k):
+            setattr(dst, k, v)
+

@@ -1,7 +1,7 @@
 class DirectDict:
     def __new__(cls, *args, **kwargs):
         ret = super().__new__(cls)
-        super(DirectDict, ret).__setattr__('_data', dict()) 
+        super(DirectDict, ret).__setattr__('_data', dict(*args, **kwargs)) 
         return ret
 
     def __init__(self, *args, **kwargs):
@@ -14,7 +14,7 @@ class DirectDict:
     def __setattr__(self,k,v):
         self._data[k] = v
 
-    def get_dict(self):
+    def get_dict(self) -> dict:
         return self._data
 
     def to_str(self, f = str):
