@@ -11,6 +11,7 @@ draft*
 build/*
 
 
+/inc/fxpkg_test/test_cache/*
 
 
 !/inc/fxpkg/resource/
