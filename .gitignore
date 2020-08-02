@@ -10,6 +10,33 @@ draft*
 .vscode/*
 build/*
 
+
+
+
+!/inc/fxpkg/resource/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -139,3 +166,15 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+
+
+
+
+
+
+
+
+
+
