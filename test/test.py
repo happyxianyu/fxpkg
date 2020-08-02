@@ -1,14 +1,28 @@
-from cbutil import Path
-tmp_path = Path(r'D:\temp')
-import sys
-sys.path.insert(0,Path.getcwd())
+# from fxpkg.db import LibDb
+# from fxpkg.dao import LibInfoDao
+# from fxpkg import FxpkgHost, init_fxpkg_root
+# from cbutil import Path
 
-from fxpkg import init_fxpkg_root
-from fxpkg import FxpkgHost
-import importlib
+# self_path = Path(__file__)
+# cache_path = self_path.prnt/'test_cache'
 
-root = init_fxpkg_root(tmp_path,is_prefix=True, overwrite=True)
-host = FxpkgHost(root)
-print(host.port.__path__)
-host.get_port('boost')
+# root_path = init_fxpkg_root(cache_path/'root', overwrite=True)
+# host = FxpkgHost(root_path,debug=True)
 
+
+from dataclasses import dataclass
+from fxpkg.util import DirectDict
+
+
+@dataclass
+class A(DirectDict):
+    a:int = 1
+    b:str = '4342'
+
+
+
+v = A(1,'324')
+print(dir(A))
+
+print(v)
+print('_data' in dir(v))
