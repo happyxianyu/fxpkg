@@ -14,27 +14,6 @@ build/*
 /inc/fxpkg_test/test_cache/*
 
 
-!/inc/fxpkg/resource/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -179,3 +158,13 @@ dmypy.json
 
 
 
+
+
+
+
+
+
+#MY CONFIG
+
+
+!/inc/fxpkg/resource/
