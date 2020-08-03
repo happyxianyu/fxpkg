@@ -1,10 +1,13 @@
 # from .librepo import LibRepo
 import importlib
 
-from .util import Path, DirectDict, path_to_sqlite_url, setattr_by_dict
-from .db import LibDb
+from .util import Path, DirectDict, path_to_sqlite_url, update_attr2
+from .db import MainDb
 from .common.globalval import resource_path
 from .datacls import LibConfig,PortConfig
+from .dao import LibInfoDao
+from .service import *
+from .common import FxConfig
 
 def init_fxpkg_root(root_path, overwrite = False, is_prefix = False):
     #set src and dst
@@ -21,25 +24,43 @@ def init_fxpkg_root(root_path, overwrite = False, is_prefix = False):
     src.copy_sons_to(dst)
     return dst
 
+class FxpkgHostPathConfig(FxConfig):
+    def __init__(self, root_path:Path):
+        super().__init__()
+        self.root = root_path
+        for name in ['log', 'tmp', 'cache', 'install', 'port', 'data']:
+            #set root sub path
+            setattr(self, name, root_path/name)
+        for name in ['download', 'src', 'build', 'other']:
+            #set cache sub path
+            setattr(self, name, self.cache/name)
+        for name in ['install', 'build']:
+            #set log sub path
+            setattr(self, f'{name}_log', self.log/name)
+        for name in ['host', 'port']:
+            #set data sub path
+            setattr(self, f'{name}_data', self.data/name)
+        
+    def create_path(self):
+        attrs = self.get_attrs()
+        for attr in attrs:
+            getattr(self, attr).mkdir()
+
+
 class FxpkgHost:
     def __init__(self, root_path, debug = False):
         root_path = Path(root_path)
 
-        #set path info
-        self.path = path = DirectDict()
-        path.root = root_path
-        for name in ['log', 'tmp', 'cache', 'install', 'port', 'data']:
-            setattr(path, name, root_path/name)
-        for name in ['download', 'src', 'build', 'other']:
-            setattr(path, name, path.cache/name)
-        for name in ['install_log', 'build_log']:
-            setattr(path, name, path.log/name)
+        self.path = path = FxpkgHostPathConfig(root_path)
+        path.create_path()
 
         #init port
         self.port =  importlib.import_module('fxpkg.port')
         self.port.__path__.insert(0,path.port.to_str())
 
-        self.db = LibDb(path_to_sqlite_url(self.path.data/'libdb.db'), echo=debug)
+        #init database and service
+        self.maindb = MainDb(path_to_sqlite_url(path.host_data/'maindb.db'), echo=debug)
+        self.libinfo_service = LibInfoService(self.maindb)
 
     def add_port(self, port_path):
         port_path = Path(port_path)
@@ -64,49 +85,62 @@ class FxpkgHost:
 
     def make_mainport(self, name:str):
         MainPort = self.get_MainPort(name)
-        return MainPort(self)
+        return MainPort(self, self.make_port_config(name))
 
     def install(self, name:str, config:LibConfig):
         port = self.make_mainport(name)
 
-        config = port.make_default_libconfig(config)
-        #TODO: change config hook
-        config = port.complete_libconfig(config)
-        config = port.install(config)
-        #TODO: store lib information
+        config = port.make_libconfig(config)
+        #TODO: add config hook
 
-    def make_port_config(self, port) -> PortConfig:
+        #TODO: install dependency
+        config = port.install(config)
+
+        if config:
+            service = self.libinfo_service
+            config.name = port.info.name
+            service.store_libinfo_by_object(config)
+            #TODO: store lib information
+        else:
+            pass
+            #TODO: handle failing
+
+
+
+    def make_port_config(self, name) -> PortConfig:
         path = self.path
-        name = port.info.name
         config = PortConfig(
-            log_path = path.build_log/name,
+            log_path = path.port_log/name,
             download_path = path.download/name,
             src_path = path.src/name,
             build_path = path.build/name,
-            install_path=path.install/name
+            install_path=path.install/name,
+            data_path=path.port_data/name
         )
         return config
 
     def complete_libconfig(self, config:LibConfig, port):
+        lconf,pconf = config, port.config
         name = port.info.name
-        pconf:PortConfig = port.port_config
 
-        subdir_name = config.make_dir_name()
+        subdir_name = lconf.make_dir_name()
+        install_path = pconf.install_path/subdir_name
 
-        src_dict = {
-            'log_path' : pconf.log_path/subdir_name,
+        updated_path = dict(
+            log_path = pconf.log_path/subdir_name,
 
-            'download_path' : pconf.download_path,
-            'src_path' : pconf.src_path,
-            'build_path' : pconf.build_path/subdir_name,
+            download_path = pconf.download_path,
+            src_path = pconf.src_path,
+            build_path = pconf.build_path/subdir_name,
 
-            'inc_path' : pconf.build_path/subdir_name/'inc'/name,
-            'lib_path' : pconf.build_path/subdir_name/'lib',
-            'bin_path' : pconf.build_path/subdir_name/'bin',
-            'cmake_path' : pconf.build_path/subdir_name/'cmake'
-        }
+            install_path = install_path,
+            inc_path = install_path/'inc'/name,
+            lib_path = install_path/'lib',
+            cmake_path = install_path/'cmake',
+            data_path = pconf.data_path/subdir_name
+        )
 
-        setattr_by_dict(config, src_dict, cond = lambda k: not hasattr(config, k) or getattr(config, k) == None)
+        update_attr2(config, updated_path)
     
 
 __all__ = ['FxpkgHost', 'init_fxpkg_root']

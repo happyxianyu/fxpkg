@@ -10,11 +10,15 @@ class PortInfo:
 
 @dataclass
 class PortConfig:
+    '''
+    #provide empty directories for every port
+    '''
     log_path:Path = None
     download_path:Path = None 
     src_path:Path = None
     build_path:Path = None
     install_path:Path = None
+    data_path:Path = None
 
 @dataclass
 class LibConfig:
@@ -32,10 +36,13 @@ class LibConfig:
     src_path:Path = None
     build_path:Path = None
 
+    install_path:Path = None
     inc_path:Path = None
     lib_path:Path = None
     bin_path:Path = None
     cmake_path:Path = None
+
+    data_path:Path = None
 
     use_exist_target:bool = True   
     #if this is true and there is existed installed target, package will not build it again.

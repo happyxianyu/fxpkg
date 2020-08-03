@@ -1,24 +1,20 @@
 from .fxhost import FxpkgHost
-from .datacls import PortInfo, LibConfig
+from .datacls import PortInfo, LibConfig, PortConfig
 from .util import DirectDict
 
 
 class FxPort:
     info:PortInfo = PortInfo(name = 'None')
 
-    def __init__(self, host: FxpkgHost):
+    def __init__(self, host: FxpkgHost, config:PortConfig):
         self.host = host
-        self.port_config = host.make_port_config(self)
+        self.config = config
         self.init()
 
     def init(self):
         pass
 
-    def make_default_libconfig(self, config: LibConfig = None) ->LibConfig:
-        return config
-
-    def complete_libconfig(self, config: LibConfig) ->LibConfig:
-        self.host.complete_libconfig(config,self)
+    def make_libconfig(self, config: LibConfig = None, option:str = None) ->LibConfig:
         return config
 
     def install(self, config: LibConfig):

@@ -5,6 +5,7 @@ from functools import partial
 from cbutil import Path,URL
 
 from fxpkg import *
+from fxpkg.util import update_attr2
 
 open_console = partial(subproc.Popen,args = ['cmd'], stdin = subproc.PIPE, stdout = sys.stdout, shell =True, text = True)
 
@@ -29,16 +30,12 @@ class MainPort(FxPort):
         version='1.73',
     )
 
-    def make_default_libconfig(self, config: LibConfig = None) ->LibConfig:
-        default_config = self.default_config
-        for k,v in default_config.items():
-            if not hasattr(config, k) or getattr(config, k) == None:
-                setattr(config, k, v)
+    def make_libconfig(self, config: LibConfig = None) ->LibConfig:
+        self.host.complete_libconfig(config)
+        update_attr2(config, self.default_config)
+        #TODO: change path info
         return config
 
-    def complete_libconfig(self, config: LibConfig) ->LibConfig:
-        self.host.complete_libconfig(config,self)
-        return config
 
     def install(self, config: LibConfig) -> LibConfig:
         self.lib_config = config
@@ -73,7 +70,7 @@ class MainPort(FxPort):
         config = self.lib_config
         build_temp_path = self_path.prnt/'boost_build_cmd.template.txt'
         build_temp = Template(build_temp_path.read_text())
-        install_path = self.port_config.install_path
+        install_path = config.install_path
         build_bat = build_temp.substitute(
             src_path=config.src_path.str,
             install_path = install_path.str,

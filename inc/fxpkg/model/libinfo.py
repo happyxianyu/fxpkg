@@ -3,6 +3,10 @@ from sqlalchemy import Column, String, BLOB, Integer
 
 from .globalval import Base
 
+LibInfo_field_key = ['name', 'version', 'arch', 'build_type', 'platform']
+LibInfo_field_val = ['src_path', 'inc_path', 'lib_path', 'bin_path', 'cmake_path', 'dependency']
+LibInfo_field_all = LibInfo_field_key + LibInfo_field_val
+
 class LibInfo(Base):
     __tablename__='LibInfo'
 
@@ -22,4 +26,14 @@ class LibInfo(Base):
 
     dependency = Column(BLOB)
 
-__all__ = ['LibInfo']
+    @staticmethod
+    def cvt_obj_to_dict(o:object) -> dict:
+        item = {}
+        for name in LibInfo_field_all:
+            if hasattr(o, name):
+                if val := getattr(o, name):
+                    item[name] = val
+        return item
+
+
+__all__ = ['LibInfo', 'LibInfo_field_key', 'LibInfo_field_val', 'LibInfo_field_all']

@@ -66,9 +66,3 @@ def update_dict_if_none(dst:dict, src:dict):
         if dstv != None:
             dst[k] = v
 
-
-def setattr_by_dict(dst:object, src:dict, cond = None):
-    for k, v in src.items():
-        if (not cond) or cond(k):
-            setattr(dst, k, v)
-

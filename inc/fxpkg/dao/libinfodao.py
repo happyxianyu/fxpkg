@@ -1,4 +1,4 @@
-from fxpkg.model import LibInfo
+from fxpkg.model.libinfo import *
 from sqlalchemy.sql import expression as sqlexpr
 from sqlalchemy import Table
 
@@ -52,25 +52,37 @@ class LibInfoDao:
     def __init__(self, exec=None):
         self.exec = exec
 
-    def add(self, x: dict):
-        stmt = self.stmt_add(x)
-        self.exec(stmt)
+    def add(self, x: dict, overwrite = True):
+        key = {k:x[k] for k in x.keys() if k in LibInfo_field_key}
+        ret = self.get_by_key(key)
+        if ret.fetchone() == None:
+            stmt = self.stmt_add(x)
+            return self.exec(stmt)
+
+        if overwrite:
+            val = {k:x[k] for k in x.keys() if k in LibInfo_field_val}
+            return self.update(key,val)
 
     def get_by_name(self, name: str):
         stmt = self.stmt_get_by_name(name)
-        self.exec(stmt)
+        return self.exec(stmt)
 
     def get_by_key(self, key: dict):
         stmt = self.stmt_get_by_key(key)
-        self.exec(stmt)
+        return self.exec(stmt)
 
     def update(self, key: dict, val: dict):
-        stmt = self.stmt_update(key, val)
-        self.exec(stmt)
+        if len(val):
+            stmt = self.stmt_update(key, val)
+            return self.exec(stmt)  
 
     def del_by_name(self, name: str):
         stmt = self.stmt_del_by_name(name)
-        self.exec(stmt)
+        return self.exec(stmt)
+
+    def get_all(self):
+        stmt = self.stmt_get_all()
+        return self.exec(stmt)
 
 
 __all__ = ['LibInfoDao']
