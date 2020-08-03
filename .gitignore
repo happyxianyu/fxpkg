@@ -167,4 +167,4 @@ dmypy.json
 #MY CONFIG
 
 
-!/inc/fxpkg/resource/
+!/inc/fxpkg/resource/**/*
