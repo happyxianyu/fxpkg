@@ -15,10 +15,21 @@ class FxPort:
         pass
 
     def make_libconfig(self, config: LibConfig = None, option:str = None) ->LibConfig:
+        '''
+        Should fill not None basic attributes to install
+        '''
         return config
 
     def install(self, config: LibConfig):
-        '''return lib info'''
+        '''Return lib info'''
+        return None
+
+    def get_support_uninstall_key(self, key):
+        '''Return support uninstall'''
+        return None
+
+    def uninstall(self, key):
+        #TODO
         return None
 
 

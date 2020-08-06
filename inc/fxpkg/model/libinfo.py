@@ -16,15 +16,17 @@ class LibInfo(Base):
     arch = Column(String, primary_key=True, nullable = False)
     build_type = Column(String, primary_key=True, nullable = False)
     platform = Column(String, primary_key=True, server_default="")
-    
-    #path
+
+    #path   
     src_path = Column(String)
     inc_path = Column(String)
     lib_path = Column(String)
     bin_path = Column(String)
     cmake_path = Column(String)
 
-    dependency = Column(BLOB)
+    dependency = Column(BLOB)   
+    depended = Column(BLOB)
+
 
     @staticmethod
     def cvt_obj_to_dict(o:object) -> dict:
@@ -34,6 +36,5 @@ class LibInfo(Base):
                 if val := getattr(o, name):
                     item[name] = val
         return item
-
 
 __all__ = ['LibInfo', 'LibInfo_field_key', 'LibInfo_field_val', 'LibInfo_field_all']

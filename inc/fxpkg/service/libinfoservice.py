@@ -11,6 +11,8 @@ class LibInfoService:
         dao = self.dao
         item = LibInfo.cvt_obj_to_dict(o)
         dao.add(item)
+
+    
         
 
 __all__ = ['LibInfoService']
