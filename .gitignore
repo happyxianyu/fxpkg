@@ -14,8 +14,7 @@ build/*
 
 /inc/fxpkg_test/test_cache/*
 
-test/cache
-test/log
+test/result
 
 
 
