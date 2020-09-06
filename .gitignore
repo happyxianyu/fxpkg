@@ -10,9 +10,11 @@ draft*
 .vscode*
 .vscode/*
 build/*
-
+/log
 
 /inc/fxpkg_test/test_cache/*
+
+
 
 !/inc/fxpkg/resource/**/*
 
