@@ -12,3 +12,10 @@ uninstall
 
 
 dependency
+
+
+
+
+
+
+config: type.json default.json
