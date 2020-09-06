@@ -20,7 +20,9 @@ def test_HostDir():
     log.info(info.make_sub_info('0.0'))
 
 def test_fxhost():
-    port_name = 'port1.py'
+    port_name = 'port1'
     host = FxHost(fxpkg_root)
-    host.add_port(PathInfo.test_port/port_name)
+    host.add_port(PathInfo.test_port/f'{port_name}.py')
     port = host.make_port(port_name)
+    port.host
+    log.info(port.lib_path_info)

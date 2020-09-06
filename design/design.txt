@@ -1,6 +1,14 @@
+lib_identity:
 name version
+
+lib_triplet:
 platform arch build_type
 
+lib_path:
+inc lib bin cmake
+
+dependency
+dependent
 
 
 config
@@ -11,11 +19,5 @@ uninstall
 
 
 
-dependency
 
-
-
-
-
-
-config: type.json default.json
+config: kind.json default.json

@@ -1,7 +1,8 @@
 import importlib
 
-from .util import Path
+from .util import Path, path_to_sqlite_url
 from .datacls import LibPathInfo
+from .db import LibDb
 
 class FxHostDir:
     def __init__(self, root:Path, create = True):
@@ -43,6 +44,10 @@ class FxHost:
         self.port =  importlib.import_module('fxpkg.port')
         self.port.__path__.insert(0,self.dir.port.str)
 
+        #init db
+        libdb_path = self.dir.host_data/'lib.db'
+        self.db = LibDb(path_to_sqlite_url(libdb_path))
+
     def add_port(self, path:Path):
         path.copy_to(self.dir.port, is_prefix=True)
 
@@ -63,6 +68,8 @@ class FxHost:
     def make_port(self, name:str):
         return self.get_MainPort(name)(self, self.dir.make_libpathinfo(name))
         
+    def install(self, name, version, triplet):
+        pass
 
 
 __all__ = ['FxHost']
