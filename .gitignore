@@ -1,3 +1,25 @@
+#BEGIN MY CONFIG 
+tmp/*
+*.tmp
+*.tmp.txt
+*.tmp.py
+*.tmp.ipynb
+draft*
+# .env
+
+.vscode*
+.vscode/*
+build/*
+
+
+/inc/fxpkg_test/test_cache/*
+
+!/inc/fxpkg/resource/**/*
+
+#END MY CONFIG
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,3 +149,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
