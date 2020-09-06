@@ -1,0 +1,22 @@
+ssh-keygen -t rsa -C "bys562bai@gmail.com"
+
+ssh -T git@github.com
+
+git --help
+
+git checkout develop
+
+
+git branch
+
+
+git branch redesign
+git checkout redesign
+
+
+
+git reset --hard aedea4128ea2c1fb05c5e68accb88c96b643ac13
+
+git status
+
+git log

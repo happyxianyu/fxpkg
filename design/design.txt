@@ -1,0 +1,14 @@
+name version
+platform arch build_type
+
+
+
+config
+install
+find
+uninstall
+
+
+
+
+dependency
