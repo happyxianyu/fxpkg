@@ -1,13 +1,13 @@
 import importlib
 
 from .util import Path, path_to_sqlite_url
-from .datacls import LibPathInfo
+from .datacls import LibPathInfo, LibConfig, LibDepUnit, LibTriplet, FxHostConfig
 from .db import LibDb
 
 class FxHostDir:
     def __init__(self, root:Path, create = True):
         self.attrs = []
-        self.lib_subdir_names = lib_subdir_names = ['config', 'cache', 'install', 'data', 'log', 'tmp']
+        self.lib_subdir_names = lib_subdir_names = ['config', 'download', 'src', 'build', 'install', 'data', 'log', 'cache', 'tmp']
         r = self._record
         r('root', root)
         for name in ['port', 'lib', 'host']:
@@ -36,6 +36,7 @@ class FxHostDir:
         return LibPathInfo(**{k:getattr(self,f'lib_{k}')/name for k in self.lib_subdir_names})
 
 
+
 class FxHost:
     def __init__(self, root:Path):
         self.dir = FxHostDir(root)
@@ -47,9 +48,16 @@ class FxHost:
         #init db
         libdb_path = self.dir.host_data/'lib.db'
         self.db = LibDb(path_to_sqlite_url(libdb_path))
+        self.config = FxHostConfig()
 
     def add_port(self, path:Path):
         path.copy_to(self.dir.port, is_prefix=True)
+    
+    def add_libconfig(self, path:Path, name, version = None):
+        dst = self.dir.lib_config/name
+        if version:
+            dst = dst/version
+        path.copy_to(dst,  is_prefix=True)
 
     def import_port(self, name:str):
         try:
@@ -63,13 +71,81 @@ class FxHost:
     def get_MainPort(self, name:str):
         m = self.import_port(name)
         if m:
-            return m.MainPort
+            mp = m.MainPort
+            if mp.name is None:
+                mp.name = name
+            return mp
         
     def make_port(self, name:str):
         return self.get_MainPort(name)(self, self.dir.make_libpathinfo(name))
         
-    def install(self, name, version, triplet):
+    def install(self, name, version, triplet = None):
         pass
 
+    def install_by_config(self, name, version, config:LibConfig):
+        pass
+
+    def install_dependncy(self, dep:LibDepUnit, triplet = None):
+        name = dep.name
+        port = self.make_port(name)
+        ver_int = dep.ver_interval
+        if ver_int.b:
+            ver = ver_int.b.str
+        else:
+            ver = port.get_latest_version()
+        self._install(port, ver, triplet)
+
+    def _install(self, port, version, triplet = None):
+        if triplet == None:
+            triplet = self.config.libtriplet
+
+        configs = self.load_libconfigs(port.name, version)
+        config = None
+        if len(configs):
+            triplet.apply_mask(port.get_triplet_mask(version))
+            config = LibConfig.get_config_from_list(configs, triplet)
+        if config is not None:
+            config = LibConfig(**triplet.to_dict())
+        config = port.make_libconfig(version, config)
+        
+        self._install_by_config(port, version, config)
+
+
+    def _install_by_config(self, port, version, config:LibConfig):
+        info = port.install(version, config)
+        #TODO
+
+
+    def get_libinfos(self, name = None, version = None, triplet = None) -> list:
+        pass
+
+    def get_libconfig_file_path(self, name, version, config_name = "default"):
+        p1 = self.dir.lib_config/name
+        p2 = p1/version
+
+        config_file_name = f'{config_name}.json'
+        f1 = p1/config_file_name
+        f2 = p2/config_file_name
+
+        for f in [f2, f1]:
+            if f.exsits():
+                return f
+
+    def load_libconfigs(self, name, version, config_name = 'default'):
+        f = self.get_config_file_path(name, version, config_name)
+        if f.exists():
+            return LibConfig.load_from_file(self.get_config_file_path(name, version, config_name))
+        return []
+
+
+    @staticmethod
+    def get_libconfig_files_in_dir(dir:Path) -> list:
+        if dir.exists():
+            return [f for f in dir.file_sons if f.ext == 'json']
+
+    @staticmethod
+    def get_libconfig_config_names_in_dir(dir:Path) -> list:
+        if dir.exists():
+            return [f.stem for f in dir.file_sons if f.ext == 'json']
 
 __all__ = ['FxHost']
