@@ -1,2 +1,2 @@
 from .libinfo import *
-from .libverinfo import LibVerInfo
+from .libverinfo import *

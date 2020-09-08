@@ -2,7 +2,7 @@ from .datacls import LibPathInfo, LibConfig
 from .model import LibInfo
 
 class FxPort:
-    name:str = 'unknown'
+    name:str = None #assign by host
 
     def __init__(self, host, lib_path_info:LibPathInfo):
         self.host = host

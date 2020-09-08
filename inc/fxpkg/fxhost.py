@@ -3,9 +3,11 @@ import importlib
 from .util import Path, path_to_sqlite_url
 from .datacls import LibPathInfo, LibConfig, LibDepUnit, LibTriplet, FxHostConfig
 from .db import LibDb
+from .service import LibService
 
 class FxHostDir:
-    def __init__(self, root:Path, create = True):
+    def __init__(self, root:Path, create = True, recreate = False):
+        root = root.absolute()
         self.attrs = []
         self.lib_subdir_names = lib_subdir_names = ['config', 'download', 'src', 'build', 'install', 'data', 'log', 'cache', 'tmp']
         r = self._record
@@ -16,7 +18,10 @@ class FxHostDir:
             r(f'lib_{name}', self.lib/name)
         for name in ['log', 'data']:
             r(f'host_{name}', self.host/name)
-        if create:
+
+        if recreate:
+            self.recreate()
+        elif create:
             self.create()
 
 
@@ -38,8 +43,8 @@ class FxHostDir:
 
 
 class FxHost:
-    def __init__(self, root:Path):
-        self.dir = FxHostDir(root)
+    def __init__(self, root:Path, reinit=False, debug = False):
+        self.dir = FxHostDir(root, recreate=reinit)
 
         #init port
         self.port =  importlib.import_module('fxpkg.port')
@@ -47,8 +52,11 @@ class FxHost:
 
         #init db
         libdb_path = self.dir.host_data/'lib.db'
-        self.db = LibDb(path_to_sqlite_url(libdb_path))
+        self.db = LibDb(path_to_sqlite_url(libdb_path), echo=debug)
         self.config = FxHostConfig()
+
+        #init service
+        self.libservice = LibService(self.db.sess)
 
     def add_port(self, path:Path):
         path.copy_to(self.dir.port, is_prefix=True)
@@ -104,7 +112,7 @@ class FxHost:
         if len(configs):
             triplet.apply_mask(port.get_triplet_mask(version))
             config = LibConfig.get_config_from_list(configs, triplet)
-        if config is not None:
+        if config != None:
             config = LibConfig(**triplet.to_dict())
         config = port.make_libconfig(version, config)
         
@@ -112,6 +120,7 @@ class FxHost:
 
 
     def _install_by_config(self, port, version, config:LibConfig):
+        #TODO: check if installed
         info = port.install(version, config)
         #TODO
 
@@ -134,7 +143,7 @@ class FxHost:
     def load_libconfigs(self, name, version, config_name = 'default'):
         f = self.get_config_file_path(name, version, config_name)
         if f.exists():
-            return LibConfig.load_from_file(self.get_config_file_path(name, version, config_name))
+            return LibConfig.load_from_file(f)
         return []
 
 

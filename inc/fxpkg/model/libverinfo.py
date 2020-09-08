@@ -9,7 +9,7 @@ class LibVerInfo(Base):
     name = Column(String, nullable = False, primary_key = True)
     version = Column(String, nullable = False, primary_key = True)
 
-    mask = Column(Integer, sever_default = 7)
+    mask = Column(Integer, server_default = '7')
 
     def to_str(self, ts = str):
         l = []
@@ -23,6 +23,11 @@ class LibVerInfo(Base):
 
     def __str__(self):
         return self.to_str(str)
+
+    @staticmethod
+    def make_by_libinfo(libinfo, mask) -> 'LibVerInfo':
+        return LibVerInfo(name = libinfo.name, version = libinfo.version, mask = mask)
+        
 
 LibVerInfo.col_names = get_tbcls_col_names(LibVerInfo)
 

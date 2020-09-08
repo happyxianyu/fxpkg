@@ -4,6 +4,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 def test_libinfo():
-    info = LibInfo()
+    info = LibInfo(name = 'name')
     log.info(info)
