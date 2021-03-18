@@ -1,1 +1,1 @@
-from .libdb import *
+from .installInfo import *
