@@ -70,19 +70,152 @@ DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
 DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
 DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
 DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
 DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
 DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:28 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 0; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 1; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 2; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 3; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 4; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 5; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 6; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 7; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 8; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:13 stage: 0; pre_res: 9; Waiting: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 0; completing: 0.0
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 1; pre_res: (0, 0.0); Waiting: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 1; completing: 0.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:13 stage: 2; pre_res: (1, 0.3333333333333333); Waiting: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
 DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
 DEBUG    root:test_async_pipeline.py:15 stage: 2; completing: 0.6666666666666666
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
 DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
 DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
 DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
-DEBUG    root:test_async_pipeline.py:28 Final result: <fxpkg.util.async_queue.AsyncDeque.NoWait object at 0x00000155AEE86DC0>
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
 DEBUG    root:test_async_pipeline.py:13 stage: 3; pre_res: (2, 0.6666666666666666); Waiting: 1.0
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
 DEBUG    root:test_async_pipeline.py:15 stage: 3; completing: 1.0
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:13 stage: 4; pre_res: (3, 1.0); Waiting: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:15 stage: 4; completing: 1.3333333333333333
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)
+DEBUG    root:test_async_pipeline.py:42 Final result: (4, 1.3333333333333333)

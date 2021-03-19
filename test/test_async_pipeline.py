@@ -1,7 +1,7 @@
 import logging
 from fxpkg.util.async_pipeline import *
 
-# print = logging.debug
+print = logging.debug
 async def foo(n):
     print('Waiting: ', n)
     await asyncio.sleep(n)
