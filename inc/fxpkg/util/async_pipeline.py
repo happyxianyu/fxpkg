@@ -19,24 +19,28 @@ class AsyncPipelineStage:
             self.done_event = asyncio.Event()
             self.next_stage = None
 
-    class Skip(BaseException):
+    class Command(BaseException):
+        pass
+
+    class Skip(Command):
         '''
-        跳转命令，可以将结果传送到之后的某个stage，但不可传递到之前的stage
+        跳转命令，会将返回值放入该stage的结果队列
+
         '''
-        def __init__(self, stage = None):
+        def __init__(self, stage):
             self.stage = stage
             self.res = None
 
-    class Discard(BaseException):
+    class Discard(Command):
         '''
         废弃结果
         '''
-        def __init__(self):
-            self.res = None
+        def __init__(self, pipe):
+            self.pipe = pipe
 
     def __init__(self, tasks = None, workers_num = 3,in_callback = None, out_callback = None, 
         bind_stage = None, next_stage = None):
-        self._in_q = AsyncDeque()
+        self._in_q = AsyncDeque() #这里用deque是为了能够插队
         self.loop = asyncio.get_event_loop()
 
         self._running_data = self.RunningData()
@@ -56,23 +60,31 @@ class AsyncPipelineStage:
         self.workers = [self.loop.create_task(self.worker()) for _ in range(workers_num)]
 
     async def worker(self):
+        Skip = self.Skip
+        Discard = self.Discard
+        Command = self.Command
         while True:
-            task = await self.get_inputs().popout()
+            task = await self._get_inputs().popout()
             if self.terminate_flag:
                 return
 
+            e = None
             try:
                 res = await task
-            except:
+            except Command as e1:
+                e = e1
+            except BaseException as e1:
+                # 不处理异常，否则会终止整个pipeline
                 pass
 
-            self._when_complete_task(self)
+            self._when_complete_task()
 
-            out_callback = self.out_callback
-            if out_callback == None:
-                await self.get_outputs().put(res)
+            if type(e) == Skip:
+                await e.stage.put_out(e.res)
+            elif type(e) == Discard:
+                self.pipe.when_task_done()
             else:
-                callback_res = await out_callback(res)
+                await self.put_out(res)
 
             running_data = self._running_data
             if running_data.uncomplete_num == 0:
@@ -83,7 +95,7 @@ class AsyncPipelineStage:
     async def connector(self, res):
         if type(res) == self.Skip:
             e = res
-            stage = e.next_stage
+            stage = e.stage
             res = e.res
         elif type(res) == self.Discard:
             stage = self
@@ -92,24 +104,23 @@ class AsyncPipelineStage:
                 if next_stage == None:
                     stage.out_callback(res)
                     return
-            return
         else:
             stage = self.get_next_stage()
         await stage.put_data(res)
 
-    def get_inputs(self):
+    def _get_inputs(self):
         return self._in_q
 
     def get_outputs(self):
         return self._running_data.out_q
 
     def put_task_nw(self, task):
-        self._when_put_task(self)
-        self.get_inputs().put_nw(task)
+        self._when_put_task()
+        self._get_inputs().put_nw(task)
 
     async def put_task(self, task):
-        self._when_put_task(self)
-        await self.get_inputs().put(task)
+        self._when_put_task()
+        await self._get_inputs().put(task)
 
     def put_tasks_nw(self, tasks):
         for task in tasks:
@@ -120,17 +131,20 @@ class AsyncPipelineStage:
             await self.put_task(task)
 
     def put_task_front_nw(self, task):
-        self._when_put_task(self)
-        self.get_inputs().appendleft_nw(task)
+        self._when_put_task()
+        self._get_inputs().appendleft_nw(task)
 
     async def put_task_front(self, task):
-        self._when_put_task(self)
-        await self.get_inputs().appendleft(task)
+        self._when_put_task()
+        await self._get_inputs().appendleft(task)
 
+#[***] put data
     def put_data_nw(self, data):
+        #TODO: schduler hook
         self.put_task_nw(self.in_callback(data))
 
     async def put_data(self, data):
+        #TODO: schduler hook
         await self.put_task(self.in_callback(data))
 
     def put_datas_nw(self, datas):
@@ -154,8 +168,30 @@ class AsyncPipelineStage:
     async def put_datas_front(self, datas):
         for data in datas:
             await self.put_data_front(data)
+#[---] put data
+    async def put_out(self, res):
+        out_callback = self.out_callback
+        if out_callback == None:
+            await self.get_outputs().put(res)
+        else:
+            await out_callback(res)
 
-    @staticmethod
+    def put_out_nw(self, res):
+        out_callback = self.out_callback
+        if out_callback == None:
+            self.get_outputs().put_nw(res)
+        else:
+            out_callback(res)
+
+    def is_out_full(self):
+        return self.get_outputs().is_full()
+
+    def is_full(self):
+        return self._in_q.is_full()
+
+    def done(self):
+        return self.get_uncomplete_num == 0
+
     def _when_put_task(self):
         running_data = self._running_data
         done_event = running_data.done_event
@@ -164,7 +200,6 @@ class AsyncPipelineStage:
         running_data.uncomplete_num+=1
         self.input_num+=1
 
-    @staticmethod
     def _when_complete_task(self):
         self._running_data.uncomplete_num-=1
     
@@ -210,9 +245,6 @@ class AsyncPipelineStage:
     
     def get_next_stage(self):
         return self._running_data.next_stage
-
-    def done(self):
-        return self.get_uncomplete_num == 0
 
     def set_out_callback(self, callback):
         '''
@@ -279,7 +311,7 @@ class AsyncPipelineStage:
         if self.closed():
             return False
         self.terminate_flag = True
-        ins = self.get_inputs()
+        ins = self._get_inputs()
         num = len(workers) - len(ins)
         if num>0:
             for _ in range(num):
@@ -352,11 +384,8 @@ class AsyncPipeline:
 
     def add_input_stage(self, stage):
         self.input_stages.append(stage)
-        def _when_put_task(stage):
-            self.uncomplete_num+=1
-            done_event = self._done_event
-            if done_event.is_set():
-                done_event.clear()
+        def _when_put_task():
+            self.when_put_task()
             AsyncPipelineStage._when_put_task(stage)
         stage._when_put_task = _when_put_task
 
@@ -366,24 +395,9 @@ class AsyncPipeline:
 
     def set_output_stage(self, stage):
         self.output_stage = stage
-        # def _when_complete_task(stage):
-        #     self.uncomplete_num-=1
-        #     done_event = self._done_event
-        #     if not done_event.is_set():
-        #         done_event.set()
-        #     AsyncPipelineStage._when_complete_task(stage)
-        # stage._when_complete_task = _when_complete_task
-
         async def out_callback(res):
-            self.uncomplete_num-=1
-            if type(res) == AsyncPipelineStage.Discard:
-                pass
-            else:
-                await stage.get_outputs().put(res)
-            if self.done():
-                done_event = self._done_event
-                if not done_event.is_set():
-                    done_event.set()
+            self.when_task_done()
+            await stage.get_outputs().append(res)
         stage.set_out_callback(out_callback)
 
     def add_serial_stages(self, stages, as_output = True):
@@ -461,6 +475,26 @@ class AsyncPipeline:
         if not loop.is_running():
             loop.run_until_complete(task)
         return True
+
+    def when_put_task(self):
+        '''
+        当任务从非input stage输入时，应当调用此方法
+        '''
+        self.uncomplete_num+=1
+        done_event = self._done_event
+        if done_event.is_set():
+            done_event.clear()
+
+    def when_task_done(self):
+        '''
+        当任务从非output stage离开管线时，应当调用此方法
+        '''
+        self.uncomplete_num-=1
+        if self.done():
+            done_event = self._done_event
+            if not done_event.is_set():
+                done_event.set()
+            self.loop.create_task(self.get_outputs().force_pop_no_wait()) #考虑到discard，已完成任务，避免阻塞
 
     async def __aenter__(self):
         return self

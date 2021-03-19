@@ -1,7 +1,21 @@
 import asyncio
 from collections import deque
 
+
+class AsyncEventEx(asyncio.Event):
+    def __init__(self):
+        self.wait_num = 0
+        super().__init__()
+
+    async def wait(self):
+        self.wait_num+=1
+        await super().wait()
+        self.wait_num-=1
+
 class AsyncDeque:
+    class NoWait:
+        pass
+
     def __init__(self, iterable = None, maxlen = None):
         kwargs = {}
         if iterable != None:
@@ -10,8 +24,8 @@ class AsyncDeque:
             kwargs['maxlen'] = maxlen
         self._q = deque(**kwargs)
         self.loop = asyncio.get_event_loop()
-        self._not_full_event = asyncio.Event()  # set when not full
-        self._not_empty_event = asyncio.Event() # set when not empty
+        self._not_full_event = AsyncEventEx()  # set when not full
+        self._not_empty_event = AsyncEventEx() # set when not empty
         if len(self):
             self._when_not_empty()
             if len(self) >= maxlen:
@@ -34,7 +48,7 @@ class AsyncDeque:
         self._when_not_empty()
 
     async def append(self, item):
-        if self.is_full():
+        while self.is_full():
             self._when_full()
             await self._not_full_event.wait()
         self._q.append(item)
@@ -45,7 +59,7 @@ class AsyncDeque:
         self._when_not_empty()
 
     async def appendleft(self, item):
-        if self.is_full():
+        while self.is_full():
             self._when_full()
             await self._not_full_event.wait()
         self._q.appendleft(item)
@@ -57,7 +71,7 @@ class AsyncDeque:
         return res
 
     async def pop(self):
-        if not len(self):
+        while len(self) == 0:
             self._when_empty()
             await self._not_empty_event.wait()
         self._when_not_full()
@@ -69,7 +83,7 @@ class AsyncDeque:
         return res
 
     async def popleft(self):
-        if not len(self):
+        while len(self) == 0:
             self._when_empty()
             await self._not_empty_event.wait()
         self._when_not_full()
@@ -107,6 +121,17 @@ class AsyncDeque:
         if self.is_full():
             self.loop.run_until_complete(
                 self._not_full_event.wait())
+
+    async def force_pop_no_wait(self):
+        '''
+        放入停止等待信息，直到当前所有等待取出数据的对象不再等待
+        '''
+        noWait = self.NoWait()
+        wait_num = self._not_empty_event.wait_num
+        put_num = wait_num - len(self)
+        if put_num > 0:
+            for _ in range(put_num):
+                await self.put(noWait)
         
     def is_full(self):
         maxlen = self.maxlen

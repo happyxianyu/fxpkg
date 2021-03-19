@@ -66,4 +66,28 @@ class InstallDAG:
                         wait_q.append(succ)
                     else:
                         self.sources.add(succ)
+
+class TaskDAGNode:
+    pass
+
+class TaskDAG:
+    def __init__(self, sources, exec_q):
+        if sources == None:
+            sources = set()
+        else:
+            sources = set(sources)
+        self.sources = sources
+        self.done_set = set()
+        self.exec_q = exec_q
+    
+    def set_as_done(self, node):
+        if node in self.sources:
+            self.sources.remove(node)
+            self.exec_q
+
+    
+
+    
+
+    
     
