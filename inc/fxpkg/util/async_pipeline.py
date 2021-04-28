@@ -1,11 +1,15 @@
 import asyncio
+import warnings
+
 import more_itertools
+
 from .async_queue import AsyncDeque
 
 
 '''
 后缀:
-b: block
+a: async，异步模式
+b: 非异步模式
 nw: no wait
 '''
 
@@ -25,7 +29,7 @@ class AsyncPipelineStage:
     class Skip(Command):
         '''
         跳转命令，会将返回值放入该stage的结果队列
-
+        如果跳转的为input stage，应当通知pipeline，when_task_done
         '''
         def __init__(self, stage):
             self.stage = stage
@@ -33,13 +37,22 @@ class AsyncPipelineStage:
 
     class Discard(Command):
         '''
-        废弃结果
+        废弃结果，如果使用pipeline应当手动通知pipeline，when_task_done
         '''
         def __init__(self, pipe):
             self.pipe = pipe
 
-    def __init__(self, tasks = None, workers_num = 3,in_callback = None, out_callback = None, 
-        bind_stage = None, next_stage = None):
+    def __init__(self, tasks = None, workers_num = 3,
+        in_callback = None, out_callback = None, 
+        bind_stage = None, next_stage = None,
+        scheduler = None):
+        '''
+        in_callback是push_data调用的协程，如果in_callback未定义，则push_data相关函数无效
+        out_callback用于自动处理输出
+        bind_stage为并联关系的stage，会将自身output设为对应stage的output
+        next_stage为串联关系的stage，会设置out_callback为connector，将输出传递到下一个stage
+        scheduler用于安排执行顺序
+        '''
         self._in_q = AsyncDeque() #这里用deque是为了能够插队
         self.loop = asyncio.get_event_loop()
 
@@ -51,10 +64,12 @@ class AsyncPipelineStage:
 
         self.set_in_callback(in_callback)
         self.set_out_callback(out_callback)
+        self.set_scheduler(scheduler)
 
         if tasks!=None:
             self.put_tasks_nw(tasks)
         
+        self.done_listeners = set()
         self.input_num = 0
         self.terminate_flag = False
         self.workers = [self.loop.create_task(self.worker()) for _ in range(workers_num)]
@@ -74,15 +89,15 @@ class AsyncPipelineStage:
             except Command as e1:
                 e = e1
             except BaseException as e1:
-                # 不处理异常，否则会终止整个pipeline
-                pass
+                # 不可抛出异常，否则会终止整个pipeline
+                self.handle_except(e1)
 
-            self._when_complete_task()
+            self._when_task_done(res)
 
             if type(e) == Skip:
                 await e.stage.put_out(e.res)
             elif type(e) == Discard:
-                self.pipe.when_task_done()
+                pass
             else:
                 await self.put_out(res)
 
@@ -107,6 +122,9 @@ class AsyncPipelineStage:
         else:
             stage = self.get_next_stage()
         await stage.put_data(res)
+
+    def handle_except(self, e):
+        pass
 
     def _get_inputs(self):
         return self._in_q
@@ -138,14 +156,18 @@ class AsyncPipelineStage:
         self._when_put_task()
         await self._get_inputs().appendleft(task)
 
-#[***] put data
+#put data:[
     def put_data_nw(self, data):
-        #TODO: schduler hook
-        self.put_task_nw(self.in_callback(data))
+        if self.scheduler != None:
+            self.loop.create_task(self.scheduler.schedule(data))
+        else:
+            self.put_task_nw(self.in_callback(data))
 
     async def put_data(self, data):
-        #TODO: schduler hook
-        await self.put_task(self.in_callback(data))
+        if self.scheduler != None:
+            await self.scheduler.schedule(data)
+        else:
+            await self.put_task(self.in_callback(data))
 
     def put_datas_nw(self, datas):
         for data in datas:
@@ -168,8 +190,26 @@ class AsyncPipelineStage:
     async def put_datas_front(self, datas):
         for data in datas:
             await self.put_data_front(data)
-#[---] put data
+#put data:]
+
+    async def put_task_node(self, node):
+        '''
+        
+        '''
+        loop = self.loop
+        await self.put_task(self.in_callback(node))
+
+    def put_task_node_nw(self, node):
+        loop = self.loop
+        if self.is_full():
+            loop.create_task(self.put_task(self.in_callback(node)))
+        else:
+            self.put_task_nw(self.in_callback(node))
+
     async def put_out(self, res):
+        '''
+        若out_callback未定义，则将res送入输出队列
+        '''
         out_callback = self.out_callback
         if out_callback == None:
             await self.get_outputs().put(res)
@@ -181,7 +221,13 @@ class AsyncPipelineStage:
         if out_callback == None:
             self.get_outputs().put_nw(res)
         else:
-            out_callback(res)
+            self.loop.create_task(out_callback(res))
+
+    def add_task_done_listener(self, f):
+        self.done_listeners.add(f)
+
+    def remove_task_done_listener(self, f):
+        self.done_listeners.remove(f)
 
     def is_out_full(self):
         return self.get_outputs().is_full()
@@ -199,9 +245,11 @@ class AsyncPipelineStage:
             done_event.clear()
         running_data.uncomplete_num+=1
         self.input_num+=1
-
-    def _when_complete_task(self):
+    
+    def _when_task_done(self, res):
         self._running_data.uncomplete_num-=1
+        for f in self.done_listeners:
+            f(res)
     
 
     def wait_b(self):
@@ -245,6 +293,11 @@ class AsyncPipelineStage:
     
     def get_next_stage(self):
         return self._running_data.next_stage
+
+    def set_scheduler(self, scheduler):
+        self.scheduler = scheduler
+        if scheduler!=None:
+            scheduler._set_stage(self)
 
     def set_out_callback(self, callback):
         '''
@@ -298,8 +351,9 @@ class AsyncPipelineStage:
             stage.set_bind_stage(self)
         return self
     
-    def connect(self, stage, callback):
-        stage.set_in_callback(callback)
+    def connect(self, stage, callback = None):
+        if callback!=None:
+            stage.set_in_callback(callback)
         self.set_next_stage(stage)
         return stage
 
@@ -396,8 +450,8 @@ class AsyncPipeline:
     def set_output_stage(self, stage):
         self.output_stage = stage
         async def out_callback(res):
-            self.when_task_done()
             await stage.get_outputs().append(res)
+            self.when_task_done()
         stage.set_out_callback(out_callback)
 
     def add_serial_stages(self, stages, as_output = True):
@@ -419,6 +473,9 @@ class AsyncPipeline:
         return self.output_stage.get_outputs()
 
     async def wait(self):
+        '''
+        等待单个out
+        '''
         if not self.done():
             await self.get_outputs().wait()
             return True
@@ -431,10 +488,11 @@ class AsyncPipeline:
         return False
 
     async def wait_done(self):
-        if not self.done():
+        '''
+        等待全部out
+        '''
+        while not self.done():
             await self._done_event.wait()
-            if not self.done():
-                await self.get_outputs().wait()
             return True
         return False
     
@@ -508,3 +566,143 @@ class AsyncPipeline:
     def __exit__(self, *execinfo):
         self.close_b()
     
+
+
+class TaskNode:
+    '''
+    需要可hash，可比较相等
+    每次使用应当重新构造新的dag
+    需要考虑实现copy, __eq__, __hash__
+    '''
+    def __init__(self, succs = None, weight = 1):
+        self.succs = set()
+        self.indegree = 0
+        self.scheduled = False
+
+        self.weight = weight #表示该节点开销，开销小的会被先执行
+
+        self._copied = None
+        if succs != None:
+            self.add_succs(succs)
+
+    def is_source(self):
+        return self.indegree == 0
+
+    def is_sink(self):
+        return len(self.succs) == 0
+
+    def add_succ(self, succ):
+        succ.indegree+=1
+        self.succs.add(succ)
+
+    def add_succs(self, succs):
+        map(self.add_succ, succs)
+
+    def __hash__(self):
+        return id(self)
+
+    def __eq__(self, x):
+        return id(self) == id(x)
+
+    def copy(self):
+        '''
+        用于拷贝用户自定义属性
+        '''
+        res = TaskNode()
+        res.weight = self.weight
+        return res
+
+    def _copy_recursive(self):
+        if self._copied != None:
+            return self._copied
+        self._copied = self.copy()
+        succs = [succ._copy_recursive() for succ in self.succs]
+        self._copied.add_succs(succs)
+        return self._copied
+
+    @staticmethod
+    def copy_dag(sources):
+        '''
+        如果要taskscheduler自动构造实例，该函数在使用scheduler之前要调用一次
+        '''
+        return [source._copy_recursive() for source in sources]
+
+    @staticmethod
+    def topo_sort_dag(sources):
+        visited = set()
+        post_list = []
+        
+        def dfs(x):
+            if x in visited:
+                return
+            visited.add(x)
+            succs = sorted(x.succs, key=lambda x:x.weight)
+            for succ in succs:
+                dfs(succ)
+            post_list.append(x)
+
+        for n in sources:
+            dfs(n)
+        post_list.reverse()
+        return post_list
+    
+        
+
+
+class TaskScheduler:
+    '''
+    基于DAG的任务规划器
+    规划器只对于put_data有效
+    '''
+    def __init__(self, done_stage = None, not_copied_warn = True):
+        '''
+        stage为任务开始的stage
+        done_stage为任务结束的stage，如果done_stage未设置，应当手动调用when_done
+        '''
+        self.stage = None
+        if done_stage == None:
+            self.done_stage = None
+        else:
+            self.set_done_stage(done_stage)
+        self._not_copied_warn = not_copied_warn
+
+    async def schedule(self, node:TaskNode):
+        '''
+        安排任务，表示node的上一阶段stage已经完成
+        node不可被两个scheduler复用
+        '''
+        stage = self.stage
+        node.scheduled = True   
+        if node.indegree == 0:
+            await stage.put_task_node(node)
+
+    def when_done(self, node:TaskNode):
+        '''
+        node完成，后继节点可以被stage执行
+        该函数可以不在当前stage被回调
+        '''
+        stage = self.stage
+        for succ in node.succs:
+            succ.indegree -= 1
+            if succ.indegree == 0 and succ.scheduled:
+                stage.put_task_node_nw(succ)    #避免死锁
+        if node._copied != None:
+            return node._copied
+        else:
+            if self._not_copied_warn:
+                warnings.warn('TaskNode is not copied!!!')
+            return node
+    
+    def close(self):
+        if self.done_stage!=None:
+            self.done_stage.remove_task_done_listener(self.when_done)
+
+    def _set_stage(self, stage):
+        self.stage = stage
+
+    def set_done_stage(self, stage):
+        self.close()
+        self.done_stage = stage
+        stage.add_task_done_listener(self.when_done)
+
+

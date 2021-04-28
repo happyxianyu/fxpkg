@@ -77,10 +77,10 @@ ext: 扩展模块，为C++构建程序如cmake提供辅助
 安装目录组织:
 fxpkg.py    主程序
 installed   库安装目录
-- compiler
--- groupids
---- artifactIds    
----- version
+- groupids
+-- artifactIds    
+--- version
+---- compiler
 ------ platforms   
 ------- archs     
 --------- include

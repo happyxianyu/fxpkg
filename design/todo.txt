@@ -8,15 +8,27 @@ stage在put_data处接到任务开始通知，在worker处接到任务完成通�
 
 
 每个库安装的顺序执行次序:
-填入name
-获取版本
-填入libdesc
-获取依赖
-安装依赖
-下载
-填入configurer
+下载和安装依赖，配置，构建，安装
+
+每步信息填入:
+(name, version, compiler, platform, arch, build_types)
+下载和安装依赖
+
+(name, version, compiler, platform, arch, build_types, 
+install_path, others)
+配置
+
+(name, version, compiler, platform, arch, build_types, 
+install_path, others)
 构建
+
+(name, version, compiler, platform, arch, build_types, 
+install_path, others)
 安装
+
+
+
+
 
 
 任何一步发生错误，都应当尝试是否能自动修复，如果不能则尝试让用户手动修复，否则安装失败，输出错误信息
