@@ -16,11 +16,10 @@ class SqliteDb:
 class SaDb:
     def __init__(self, url = 'sqlite:///:memory:', echo = True):
         self.engine = sa.create_engine(url, echo = echo)
-        self.conn = self.engine.connect()
         self.metadata = self.make_metadata()
         
     def make_metadata(self):
         return sa.MetaData(bind = self.engine)
-    
-    def commit(self):
-        return self.commit()
+
+    def connect(self):
+        return self.engine.connect()

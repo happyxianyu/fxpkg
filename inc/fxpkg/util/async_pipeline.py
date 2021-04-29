@@ -1,5 +1,7 @@
 import asyncio
+import atexit
 import warnings
+import weakref
 
 import more_itertools
 
@@ -12,6 +14,24 @@ a: async，异步模式
 b: 非异步模式
 nw: no wait
 '''
+
+__all__ = [
+    'AsyncPipelineStage',
+    'AsyncPipeline',
+    'TaskNode',
+    'TaskScheduler'
+]
+
+
+
+_activating_stages = set() #(weak ref of stage)
+
+
+@atexit.register
+def _cleanup():
+    for ref in _activating_stages:
+        stage = ref()
+
 
 
 
@@ -74,6 +94,10 @@ class AsyncPipelineStage:
         self.terminate_flag = False
         self.workers = [self.loop.create_task(self.worker()) for _ in range(workers_num)]
 
+        wref = weakref.ref(self)
+        _activating_stages.add(weakref.ref(self))
+        self._wref = wref
+
     async def worker(self):
         Skip = self.Skip
         Discard = self.Discard
@@ -88,9 +112,10 @@ class AsyncPipelineStage:
                 res = await task
             except Command as e1:
                 e = e1
+                res = e
             except BaseException as e1:
                 # 不可抛出异常，否则会终止整个pipeline
-                self.handle_except(e1)
+                res = self.handle_except(e1)
 
             self._when_task_done(res)
 
@@ -376,9 +401,9 @@ class AsyncPipelineStage:
         return True
     
     def close_b(self):
-        workers = self.workers
         if self.closed():
             return False
+        workers = self.workers
 
         loop = self.loop
         task = loop.create_task(self.close())
@@ -418,6 +443,10 @@ class AsyncPipelineStage:
     
     def __exit__(self, *execinfo):
         self.close_b() 
+
+    def __del__(self):
+        self.close_b()
+        _activating_stages.remove(self._wref)
 
 
 
@@ -565,7 +594,7 @@ class AsyncPipeline:
     
     def __exit__(self, *execinfo):
         self.close_b()
-    
+
 
 
 class TaskNode:
@@ -704,5 +733,6 @@ class TaskScheduler:
         self.close()
         self.done_stage = stage
         stage.add_task_done_listener(self.when_done)
+
 
 

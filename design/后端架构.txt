@@ -1,12 +1,12 @@
 每个库都有一个在groupid下的唯一libid，由一个字符串表示
 name或libid为groupid.artifactid，groupid可以为空，空的groupid其中name直接以artifactid为表示，libid要求唯一
 package的名字也要求唯一，通常应当和库名一致
-
+groupid默认为main
 
 
 InstallEntryTable每个条目具有以下属性:
-libid, 
-name, version, compiler, platform, arch, build_type, other_keys
+entry_id, 
+libid, version, compiler, platform, arch, build_type, other_keys
 install_path, include_path, lib_path, bin_path, cmake_path, 
 lib_list
 dll_list
@@ -31,7 +31,7 @@ lib_list为安装的静态库文件名列表，如果有依赖关系，则左边
 dll_list为安装的动态库文件名列表
 dependent以list存储，其中保存的是使用被依赖的id
 dependency保存使用依赖库的libid
-install_state记录安装状态，包括complete, damage, installing, uninstalling，fail_install，fail_uninstall
+install_state记录安装状态，包括Intact, damage, installing, uninstalling，fail_install，fail_uninstall
 依赖只记录使用依赖，而不记录构建依赖
 
 

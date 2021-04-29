@@ -11,18 +11,18 @@ stage在put_data处接到任务开始通知，在worker处接到任务完成通�
 下载和安装依赖，配置，构建，安装
 
 每步信息填入:
-(name, version, compiler, platform, arch, build_types)
+(name, version, compiler, platform, arch, build_type)
 下载和安装依赖
 
-(name, version, compiler, platform, arch, build_types, 
+(name, version, compiler, platform, arch, build_type, 
 install_path, others)
 配置
 
-(name, version, compiler, platform, arch, build_types, 
+(name, version, compiler, platform, arch, build_type, 
 install_path, others)
 构建
 
-(name, version, compiler, platform, arch, build_types, 
+(name, version, compiler, platform, arch, build_type, 
 install_path, others)
 安装
 

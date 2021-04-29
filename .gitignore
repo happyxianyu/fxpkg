@@ -10,7 +10,7 @@ draft*
 .vscode*
 .vscode/*
 build/*
-/log
+/test/log
 
 /inc/fxpkg_test/test_cache/*
 

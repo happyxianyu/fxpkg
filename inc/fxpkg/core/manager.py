@@ -9,7 +9,7 @@ import random
 from fxpkg.util import Path
 import fxpkg.package
 from fxpkg.db import *
-from .dataclass import *
+from fxpkg.common.dataclass import *
 from .util import parse_libid, get_sys_info
 
 
@@ -34,6 +34,7 @@ class PathManager:
             root_path/'installed',
             root_path/'data',
             root_path/'data/host',
+            root_path/'data/package',
             root_path/'package',
             root_path/'package/main',
             root_path/'config',
@@ -81,7 +82,7 @@ class PathManager:
 
     def fill_installConfig(self, config):
         '''
-        根据configInfo.name填充值路径信息
+        根据installconfig填充值路径信息
         '''
         pass
 
@@ -105,91 +106,6 @@ class LibManager:
         self.configManager = host.configManager
         self.repo = InstallInfoRespository(pathManager.installInfoDb_path)
 
-    def get_using_infos(self, libDescs):
-        '''
-        返回LibUsingInfos
-        lib_names要求顺序正确，左边的依赖右边的
-        '''
-        pass
-
-    def get_using_infos_by_names(self, names, build_type = 'release'):
-        pass
-
-
-
-    def make_install_DAG_by_libDesc(self, libDesc):
-        '''
-        构建安装依赖图，记录需要安装的节点，已安装节点略过
-        每个安装节点可以获取属性:
-        configurer, dependent, dependency
-        '''
-        pass
-
-    def install_by_libDesc_async(self, libDesc):
-        groupId, artifactId = parse_libid(libDesc.name)
-        pkg = self.get_package(artifactId, groupId)
-        config = pkg.get_config()
-        installer = pkg.get_installer()
-        
-        #TODO: auto complete libDesc
-
-
-
-
-    def install_by_configInfo(self, configInfo:InstallConfig):
-        groupId, artifactId = parse_libid(configInfo.name)
-        pkg = self.get_package(artifactId, groupId)
-        config = pkg.get_config()
-        installer = pkg.get_installer()
-
-        #auto complete
-        host_platform, host_arch = get_sys_info()
-        if configInfo.version == None:
-            configInfo.version = pkg.get_latest_version()
-        if configInfo.platform == None:
-            configInfo.platform = host_platform
-        if configInfo.arch == None:
-            configInfo.arch = host_arch
-        if configInfo.build_type == None:
-            configInfo.build_type = self.configManager.default_config['build_config']['resource_config']
-
-        config.set_configInfo(configInfo)
-
-        for _ in range(2):
-        #尝试安装两遍，第一次安装为了保证configurer依赖正确更新
-            dependency = config.get_dependency()
-            #check satisfy dependency, if not install dependency
-            #TODO
-
-            config.auto_complete()
-
-            #尝试安装
-            #TODO
-
-        #尝试人工处理
-        if not config.is_legal():
-            if not self.solve_config(config):
-                raise InstallFailException()
-        
-        #再次尝试安装
-        #TODO
-
-    def install_by_libDesc(self, libDesc:LibDesc):
-        pass
-
-
-    def install_by_libDescs(self, libDescs):
-        pass
-
-    def install_by_names(self, names, build_type = 'release'):
-        '''
-        使用默认设定进行安装
-        '''
-        pass
-
-    def uninstall_by_name(self, name, build_type = 'release'):
-        pass
-
     def get_package(self, artifactId, groupId = 'main'):
         m = importlib.import_module(f'fxpkg.package.{groupId}.{artifactId}')
         return m.Package(self)
@@ -208,12 +124,6 @@ class LibManager:
             dst.mkdir()
             (dst/'__init__.py').touch()
         src.copy_to(dst, is_prefix=True)
-
-    def solve_config(self, configurer):
-        '''
-        人工处理，继续尝试安装返回True，否则返回False
-        '''
-        return False
 
 class ConfigManager:
     def __init__(self, pathManager:PathManager):

@@ -1,20 +1,13 @@
-# -*- coding:utf-8 -*-
+from fxpkg.core.host import Host
+from fxpkg.core.package import *
 from fxpkg.common.dataclass import InstallConfig
-from .host import Host
+from fxpkg.util import *
 
+class CMakeInstaller(InstallerBase):
+    def __init__(self, host:Host, config:InstallConfig):
+        self.host = host
+        self.config = config
 
-class VersionSetBase:
-    def __contains__(self, ver):
-        return False
-
-    def __iter__(self):
-        '''
-        返回可用版本，不一定要全面
-        '''
-        return iter()
-
-
-class InstallerBase:
     async def download(self):
         r'''
         optional
@@ -33,6 +26,10 @@ class InstallerBase:
         成功返回True，失败返回抛出异常
         如果因为配置失败，则更新config的ilegal fields
         '''
+        config = self.config
+        private_path = config.build_path/Path('_fxpkg_private')
+        shell_script = 'cmake -DCMAKE_PREFIX_PATH={} -DCMAKE_INSTALL_PREFIX={} -B {private_path.excape_str}'
+        #TODO
     
     async def install(self):
         pass
@@ -44,18 +41,3 @@ class InstallerBase:
         return False
 
         
-class PackageBase:
-    def __init__(self, host:Host):
-        pass
-
-    def get_latest_version(self) -> str:
-        '''
-        返回该package最新可安装版本
-        '''
-        pass
-
-    def get_installer(self) -> InstallerBase:
-        '''
-        返回InstallerBase的子类的一个实例，每次调用都应当构造一个新的实例
-        '''
-        pass 
