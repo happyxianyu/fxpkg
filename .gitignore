@@ -9,6 +9,10 @@ draft*
 
 .vscode*
 .vscode/*
+.idea/*
+.pytest_cache/*
+
+
 build/*
 /test/log/*
 
