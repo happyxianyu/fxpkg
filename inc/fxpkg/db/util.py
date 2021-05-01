@@ -21,5 +21,7 @@ class SaDb:
     def make_metadata(self):
         return sa.MetaData(bind = self.engine)
 
-    def connect(self):
+    def connect(self)  -> sa.engine.Connection:
         return self.engine.connect()
+
+
