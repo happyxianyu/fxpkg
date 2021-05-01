@@ -1,7 +1,12 @@
 
-package api修改
 安装数据查询，''可以匹配任何值
-promise/future的executor
+安装改为异步生成器方式
+
+例:
+yield 'download'
+yield 'build'
+yield 'configure'
+yield 'install'
 
 
 

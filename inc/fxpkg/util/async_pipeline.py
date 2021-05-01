@@ -31,6 +31,8 @@ _activating_stages = set() #(weak ref of stage)
 def _cleanup():
     for ref in _activating_stages:
         stage = ref()
+        if stage is not None:
+            stage.terminate()
 
 
 
@@ -43,7 +45,7 @@ class AsyncPipelineStage:
             self.done_event = asyncio.Event()
             self.next_stage = None
 
-    class Command(BaseException):
+    class Command(Exception):
         pass
 
     class Skip(Command):
@@ -63,9 +65,9 @@ class AsyncPipelineStage:
             self.pipe = pipe
 
     def __init__(self, tasks = None, workers_num = 3,
-        in_callback = None, out_callback = None, 
-        bind_stage = None, next_stage = None,
-        scheduler = None):
+                 in_callback = None, out_callback = None,
+                 bind_stage = None, next_stage = None,
+                 scheduler = None):
         '''
         in_callback是push_data调用的协程，如果in_callback未定义，则push_data相关函数无效
         out_callback用于自动处理输出
@@ -113,7 +115,7 @@ class AsyncPipelineStage:
             except Command as e1:
                 e = e1
                 res = e
-            except BaseException as e1:
+            except Exception as e1:
                 # 不可抛出异常，否则会终止整个pipeline
                 res = self.handle_except(e1)
 
@@ -432,6 +434,10 @@ class AsyncPipelineStage:
             loop.run_until_complete(task)
         return True
 
+    def terminate(self):
+        for worker in self.workers:
+            worker.cancel()
+
     async def __aenter__(self):
         return self
 
@@ -581,7 +587,7 @@ class AsyncPipeline:
             done_event = self._done_event
             if not done_event.is_set():
                 done_event.set()
-            self.loop.create_task(self.get_outputs().force_pop_no_wait()) #考虑到discard，已完成任务，避免阻塞
+            self.loop.create_task(self.get_outputs().push_no_waits()) #考虑到discard，已完成任务，避免阻塞
 
     async def __aenter__(self):
         return self

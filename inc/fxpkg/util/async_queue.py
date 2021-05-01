@@ -122,21 +122,26 @@ class AsyncDeque:
             self.loop.run_until_complete(
                 self._not_full_event.wait())
 
-    async def force_pop_no_wait(self):
+    async def push_no_waits(self):
         '''
         放入停止等待信息，直到当前所有等待取出数据的对象不再等待
         '''
-        noWait = self.NoWait()
+        NoWait = self.NoWait
         wait_num = self._not_empty_event.wait_num
         put_num = wait_num - len(self)
         if put_num > 0:
             for _ in range(put_num):
-                await self.put(noWait)
+                await self.put(NoWait)
         
     def is_full(self):
         maxlen = self.maxlen
         return self.maxlen!= None and len(self) >= maxlen
-    
+
+    def clear(self):
+        self._q.clear()
+        self._when_not_full()
+        self._when_empty()
+
     def __str__(self):
         return self.to_str(str)
 
@@ -168,3 +173,4 @@ class AsyncDeque:
         event = self._not_full_event
         if not event.is_set():
             event.set()
+

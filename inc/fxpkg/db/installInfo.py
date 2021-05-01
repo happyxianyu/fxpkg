@@ -73,14 +73,18 @@ class InstallEntryTable:
     def get_by_entry_id(self, entry_id: int):
         return self._search_one(dict(entry_id=entry_id))
 
-    def get_by_key_fields(self, entry: InstallEntry):
-        '''
-        要求key fields全部填满
-        '''
+    def get_by_key_fields(self, entry: InstallEntry, exact = True):
+        """
+        要求key fields全部填满, 只有key field有效，value field会被忽略
+        若exact = False，则可以匹配除了值本身外，还可以匹配''
+        """
         key_fields = self.key_fields
         entry_d = self._entry_to_dict(entry)
-        keys = {k: entry_d[k] for k in key_fields}
-        return self._search_one(keys)
+        if exact:
+            keys = {k: entry_d[k] for k in key_fields}
+            return self._search_one(keys)
+        else:
+            pass#TODO
 
     def _search(self, keys: dict):
         conn = self.repo.conn
