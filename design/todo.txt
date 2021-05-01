@@ -1,9 +1,7 @@
-将任务间依赖的DAG框架化，实现更为通用的模式，即给出任务DAG，对于任意Stage，都可以自动进行判断执行顺序
 
-
-stage在put_data处接到任务开始通知，在worker处接到任务完成通知，以此控制任务依赖
-需要scheduler，根据DAG顺理任务顺序
-
+package api修改
+安装数据查询，''可以匹配任何值
+promise/future的executor
 
 
 
@@ -32,3 +30,8 @@ install_path, others)
 
 
 任何一步发生错误，都应当尝试是否能自动修复，如果不能则尝试让用户手动修复，否则安装失败，输出错误信息
+
+
+
+None表示任意
+''表示空

@@ -18,6 +18,9 @@ build/*
 
 !/inc/fxpkg/resource/**/*
 
+/.idea
+/.pytest_cache
+
 #END MY CONFIG
 
 
