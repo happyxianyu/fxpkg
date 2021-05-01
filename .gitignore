@@ -1,5 +1,5 @@
 #BEGIN MY CONFIG 
-*/tmp
+**/tmp/*
 *.tmp
 *.tmp.txt
 *.tmp.py
