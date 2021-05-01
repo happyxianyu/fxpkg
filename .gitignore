@@ -5,7 +5,7 @@
 *.tmp.py
 *.tmp.ipynb
 draft*
-# .env
+.env
 
 .vscode*
 .vscode/*
