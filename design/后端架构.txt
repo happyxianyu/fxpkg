@@ -93,31 +93,26 @@ data        保存的数据
 -package  安装器保存的数据
 --groupids
 ---artifactIds
+
 package   包裹
 -groupids
+
 config      配置
 -config.json   默认配置
 -host       本体配置，包括一些默认值
 -package
 --groupids
 ---artifactIds
+
 log         日志
 -host       本体日志
 -package    包裹日志
---groupids
----artifactIds
+
 cache       缓存
--host       本体缓存
--package
---tmp        临时缓存，程序结束后自动清除
----groupids
-----artifactIds
---download   下载缓存，手动清除
----groupids
-----packageids
---build      构建缓存，手动清除
----groupids
-----packageids
+-tmp
+-download
+-build
+-host 本体缓存
 
 
 

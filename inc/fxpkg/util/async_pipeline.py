@@ -29,7 +29,7 @@ _activating_stages = set() #(weak ref of stage)
 
 @atexit.register
 def _cleanup():
-    for ref in _activating_stages:
+    for ref in list(_activating_stages):
         stage = ref()
         if stage is not None:
             stage.terminate()

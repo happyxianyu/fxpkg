@@ -1,47 +1,15 @@
 # -*- coding:utf-8 -*-
 from fxpkg.common.dataclass import InstallConfig
 from .host import Host
-
-
-class VersionSetBase:
-    def __contains__(self, ver):
-        return False
-
-    def __iter__(self):
-        '''
-        返回可用版本，不一定要全面
-        '''
-        return iter()
-
+from fxpkg.common.types import VersionSetBase
+from fxpkg.common.dataclass import *
 
 class InstallerBase:
-    async def download(self):
-        r'''
-        optional
-        成功返回True，失败返回抛出异常
-        如果因为配置失败，则更新config的ilegal fields
-        如果实现，一次下载多个库可以同时编译和下载
-        '''
-        return True
+    def __init__(self, libManager : 'LibManager'):
+        self.libManager = libManager
 
-    async def configure(self):
-        pass
-
-    async def build(self):
-        '''
-        optional
-        成功返回True，失败返回抛出异常
-        如果因为配置失败，则更新config的ilegal fields
-        '''
-    
-    async def install(self):
-        pass
-
-    async def uninstall(self, libDesc):
-        r'''
-        成功返回True， 失败返回False
-        '''
-        return False
+    async def install(self, config: InstallConfig, entry: InstallEntry):
+        yield
 
         
 class PackageBase:

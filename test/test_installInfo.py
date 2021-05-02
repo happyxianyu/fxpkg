@@ -15,9 +15,7 @@ def test_install_info_respository():
     try:
         path = tmp_path / 'install_info.db'
         path.remove()
-        repo = InstallInfoRespository(path, echo=True)
-        with repo.db.engine.begin() as conn:
-            print(type(conn))
+        repo = InstallInfoRepository(path, echo=True)
     except:
         assert False
 
@@ -25,9 +23,8 @@ def test_install_info_respository():
 def test_get_by_id():
     try:
         path = tmp_path / 'install_info.db'
-        repo = InstallInfoRespository(path, echo=True)
-        tb = repo.installEntry_tb
-        res = tb.get_by_entry_id(0)
+        repo = InstallInfoRepository(path, echo=True)
+        res = repo.get_by_entry_id(0)
         print(f'res: {res}')
     except:
         assert False

@@ -1,5 +1,6 @@
 import asyncio
 from collections import deque
+from contextlib import contextmanager, asynccontextmanager
 
 
 class AsyncEventEx(asyncio.Event):
@@ -8,15 +9,16 @@ class AsyncEventEx(asyncio.Event):
         super().__init__()
 
     async def wait(self):
-        self.wait_num+=1
+        self.wait_num += 1
         await super().wait()
-        self.wait_num-=1
+        self.wait_num -= 1
+
 
 class AsyncDeque:
     class NoWait:
         pass
 
-    def __init__(self, iterable = None, maxlen = None):
+    def __init__(self, iterable=None, maxlen=None):
         kwargs = {}
         if iterable != None:
             kwargs['iterable'] = iterable
@@ -25,7 +27,15 @@ class AsyncDeque:
         self._q = deque(**kwargs)
         self.loop = asyncio.get_event_loop()
         self._not_full_event = AsyncEventEx()  # set when not full
-        self._not_empty_event = AsyncEventEx() # set when not empty
+        self._not_empty_event = AsyncEventEx()  # set when not empty
+
+        self._pop_event = asyncio.Event()
+        self._put_event = asyncio.Event()
+        self._pop_lock = asyncio.Lock()
+        self._put_lock = asyncio.Lock()
+        self.pop_wait_num = 0
+        self.put_wait_num = 0
+
         if len(self):
             self._when_not_empty()
             if len(self) >= maxlen:
@@ -76,7 +86,7 @@ class AsyncDeque:
             await self._not_empty_event.wait()
         self._when_not_full()
         return self._q.pop()
-        
+
     def popleft_nw(self):
         res = self._q.popleft()
         self._when_not_full()
@@ -107,7 +117,7 @@ class AsyncDeque:
         '''
         if len(self) == 0:
             await self._not_empty_event.wait()
-    
+
     def wait_b(self):
         if len(self) == 0:
             self.loop.run_until_complete(
@@ -132,10 +142,10 @@ class AsyncDeque:
         if put_num > 0:
             for _ in range(put_num):
                 await self.put(NoWait)
-        
+
     def is_full(self):
         maxlen = self.maxlen
-        return self.maxlen!= None and len(self) >= maxlen
+        return self.maxlen != None and len(self) >= maxlen
 
     def clear(self):
         self._q.clear()
@@ -148,17 +158,17 @@ class AsyncDeque:
     def __repr__(self):
         return self.to_str(repr)
 
-    def to_str(self, f = str):
-        return f'AsyncDeque{f(self._q)[5:]}'    
+    def to_str(self, f=str):
+        return f'AsyncDeque{f(self._q)[5:]}'
 
     def __iter__(self):
-        return iter(self._q) 
-    
+        return iter(self._q)
+
     def _when_empty(self):
         event = self._not_empty_event
         if event.is_set():
             event.clear()
-    
+
     def _when_not_empty(self):
         event = self._not_empty_event
         if not event.is_set():
@@ -168,9 +178,59 @@ class AsyncDeque:
         event = self._not_full_event
         if event.is_set():
             event.clear()
-    
+
     def _when_not_full(self):
         event = self._not_full_event
         if not event.is_set():
             event.set()
 
+    @asynccontextmanager
+    async def _when_pop(self):
+        # before pop
+        if len(self) == 0:
+            if self._pop_lock.locked():
+                self.pop_wait_num += 1
+                async with self._pop_lock:
+                    self.pop_wait_num -= 1
+                    yield  # pop
+        else:
+            yield  # pop
+        # after pop
+        self._set_event(self._pop_event)
+        self._pop_event = asyncio.Event()
+        self._release_lock(self._put_lock)
+
+    @asynccontextmanager
+    async def _when_put(self):
+        # before put
+        while self.is_full():
+            if self._put_lock.locked():
+                self.put_wait_num+=1
+                async with self._put_lock:
+                    self.put_wait_num-=1
+                    yield  # put
+        else:
+            yield  # put
+        # after put
+        self._set_event(self._put_event, self._not_empty_event)
+        self._put_event = asyncio.Event()
+        self._release_lock(self._pop_lock)
+
+
+    @staticmethod
+    def _set_event(*events):
+        for event in events:
+            if not event.is_set():
+                event.set()
+
+    @staticmethod
+    def _clear_event(*events):
+        for event in events:
+            if event.is_set():
+                event.clear()
+
+    @staticmethod
+    def _release_lock(*locks):
+        for lock in locks:
+            if lock.locked():
+                lock.release()

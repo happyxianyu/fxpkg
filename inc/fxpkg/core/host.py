@@ -2,6 +2,10 @@
 from fxpkg.util import Path
 from .manager import *
 
+__all__ = [
+    'setup_fxpkg',
+    'Host'
+]
 
 def setup_fxpkg(path, is_prefix = True):
     '''
@@ -21,7 +25,8 @@ class Host:
     def __init__(self, root_path):
         self.pathManager = PathManager(root_path)
         self.configManager = ConfigManager(self.pathManager)
-        self.libManager = LibManager(self)
+        self.libManager = LibManager(self.pathManager, self.configManager)
+
 
 
 
