@@ -11,14 +11,15 @@ class InstallerBase:
         self.stage: str = 'initial'
         self.config: InstallConfig = None
         self.entry: InstallEntry = None
+        self.reserved = None
 
     async def install(self, config: InstallConfig, entry: InstallEntry):
         yield
 
-    async def submit_task(self, task) -> asyncio.Future:
-        return self.libManager.submit_task(self, task)
+    def submit_task(self, task) -> asyncio.Future:
+        return self.libManager.submit_task(task, self.stage)
 
-    def show_progress(self, size=None, total=None, speed=None, info=None):
+    def show_progress(self, size=None, total=None, info=None, tag=None):
         pass
 
         

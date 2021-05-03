@@ -1,5 +1,8 @@
 import typing
 
+__all__ = [
+    'VersionSetBase'
+]
 class VersionSetBase:
     def __contains__(self, ver):
         return False
@@ -10,4 +13,4 @@ class VersionSetBase:
         '''
         return iter([''])
 
-del typing
+

@@ -1,5 +1,5 @@
 class DictObjectPorxy:
-    def __init__(self, o:object):
+    def __init__(self, o: object):
         self.o = o
 
     def keys(self):
@@ -21,10 +21,10 @@ class DictObjectPorxy:
     def __contains__(self, key):
         return hasattr(self.o, key)
 
-    def replace(self, d:dict):
-        for k in d:
-            self[k] = d
-
-    def update(self, d:dict):
-        for k,v in d.items():
+    def update(self, d: dict, cond=None):
+        if cond is not None:
+            for k, v in d.items():
+                if cond(k, v):
+                    self[k] = v
+        for k, v in d.items():
             self[k] = v

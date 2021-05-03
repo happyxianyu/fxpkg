@@ -11,12 +11,13 @@ import random
 import asyncio
 
 import fxpkg.package
-
-from .package import *
 from fxpkg.db import *
 from fxpkg.common.dataclass import *
 from fxpkg.common import *
 from fxpkg.util import *
+
+from .package import *
+from .output import *
 
 from .util import parse_libid, get_sys_info
 
@@ -49,8 +50,8 @@ class PathManager:
 
         self.root_path = root_path
 
-        self.pkg_install_path = root_path/'installed'
-        self.pkg_download_path = root_path/'cache/download'
+        self.pkg_install_path = root_path / 'installed'
+        self.pkg_download_path = root_path / 'cache/download'
 
         self.paths = [
             self.pkg_install_path,
@@ -137,17 +138,17 @@ class PathManager:
         root_path = self.root_path
         return root_path / path
 
-
     def get_pkg_path_info(self, info):
         libid = info.libid
         version = info.version
         groupid, artifactid = parse_libid(libid)
-        lib_prefix = Path()/groupid/artifactid/version
-        path_info=dict(
-            install_path= self.pkg_install_path/lib_prefix,
-            download_path = self.pkg_download_path/lib_prefix,
+        lib_prefix = Path() / groupid / artifactid / version
+        path_info = dict(
+            install_path=self.pkg_install_path / lib_prefix,
+            download_path=self.pkg_download_path / lib_prefix,
         )
         return path_info
+
 
 class ConfigManager:
     def __init__(self, pathManager: PathManager):
@@ -166,7 +167,13 @@ class ConfigManager:
 
 
 class LibManager:
-    def __init__(self, pathManager: 'PathManager', configManager: 'ConfigManager'):
+    def __init__(self,
+                 pathManager: 'PathManager',
+                 configManager: 'ConfigManager',
+                 outHandler: LibManagerOutHandler = None):
+        if outHandler is None:
+            self._outHandler = DefaultLibManagerOutHandler()
+
         add_path_to_module(fxpkg.package, pathManager.package_path)
         self.pathManager = pathManager
         self.configManager = configManager
@@ -199,7 +206,7 @@ class LibManager:
             (dst / '__init__.py').touch()
         src.copy_to(dst, is_prefix=True)
 
-    def _pre_proc_config(self, pkg:PackageBase, config:InstallConfig):
+    def _pre_proc_config(self, pkg: PackageBase, config: InstallConfig):
         assert config.libid is not None
         versions = pkg.get_versions()
         if config.version is None:
@@ -207,8 +214,9 @@ class LibManager:
                 config.version = ver
         pathManager = self.pathManager
         config_d = DictObjectPorxy(config)
-        config_d.update(pathManager.get_pkg_path_info(config))
 
+        # update when None
+        config_d.update(pathManager.get_pkg_path_info(config), cond=lambda k, v: config_d[k] is None)
 
     async def install_lib(self, config: InstallConfig):
         pkg = self.get_package(config.libid)
@@ -221,6 +229,7 @@ class LibManager:
         installer.stage = 'initial'
         installer.config = config
         installer.entry = entry
+        self._outHandler.install_begin(id(installer), config)
         async for stage in installer.install(config, entry):
             logging.debug(stage)
             if False:
@@ -239,6 +248,7 @@ class LibManager:
 
                 prev_stage = stage
                 prev_state = state
+        self._outHandler.update_install_state(id(installer), 'done', installer.entry)
 
         return entry
 
@@ -260,9 +270,8 @@ class LibManager:
         """
         pass
 
-    async def submit_task(self, installer, task) -> asyncio.Future:
+    async def submit_task(self, task, stage: str) -> asyncio.Future:
         executors = self._executors
-        stage = installer.stage
         logging.debug(stage)
         future = await executors[stage].submit(task)
         return future
@@ -301,3 +310,6 @@ class LibManager:
         entry_proxy = DictObjectPorxy(entry)
         for key in entry.path_fields:
             entry_proxy[key] = self.pathManager.to_abs(entry_proxy[path])
+
+    def show_progress(self, installer, size=None, total=None, info=None, tag=None):
+        self._outHandler.update_progress(id(installer),size,total,info,tag)
