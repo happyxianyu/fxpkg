@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
+import logging
 from fxpkg.util import Path
 from .manager import *
+
 
 __all__ = [
     'setup_fxpkg',

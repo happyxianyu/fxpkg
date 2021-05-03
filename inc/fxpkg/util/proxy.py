@@ -24,3 +24,7 @@ class DictObjectPorxy:
     def replace(self, d:dict):
         for k in d:
             self[k] = d
+
+    def update(self, d:dict):
+        for k,v in d.items():
+            self[k] = v

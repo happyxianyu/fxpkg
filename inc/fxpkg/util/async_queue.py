@@ -103,6 +103,9 @@ class AsyncDeque:
             async with self._acquire_pop_lock():  # 获取并释放
                 pass
 
+    async def wait_pop(self):
+        await self._pop_event.wait()
+
     async def wait_done(self):
         while len(self) != 0:
             await self._pop_event.wait()

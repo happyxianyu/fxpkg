@@ -1,4 +1,8 @@
+import logging
+
 from fxpkg import *
+
+print = logging.debug
 
 self_path = Path(__file__)
 prnt_path = self_path.prnt

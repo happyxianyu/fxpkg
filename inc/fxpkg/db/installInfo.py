@@ -47,20 +47,20 @@ class InstallEntryTable:
             Column('other_key', PickleType, default=''),
 
             Column('install_path', PathType),
-            Column('include_path', PathType, default=''),
-            Column('lib_path', PathType, default=''),
-            Column('bin_path', PathType, default=''),
-            Column('cmake_path', PathType, default=''),
+            Column('include_path', PathType, default=None),
+            Column('lib_path', PathType, default=None),
+            Column('bin_path', PathType, default=None),
+            Column('cmake_path', PathType, default=None),
 
-            Column('lib_list', PickleType, default=''),
-            Column('dll_list', PickleType, default=''),
+            Column('lib_list', PickleType, default=None),
+            Column('dll_list', PickleType, default=None),
 
-            Column('dependent', PickleType, default=''),
-            Column('dependency', PickleType, default=''),
+            Column('dependent', PickleType, default=None),
+            Column('dependency', PickleType, default=None),
 
             Column('install_state', Enum(InstallState)),
 
-            Column('other', PickleType, default=''),
+            Column('other', PickleType, default=None),
             UniqueConstraint(*self.key_fields)
         )
 
@@ -105,10 +105,10 @@ class InstallEntryTable:
         keys = {k: entry_d[k] for k in key_fields if entry_d[k] is not None}
 
         if exact:
-            founds = self._search(keys).all()
+            founds = self._search(keys, order_by=['version'], desc=True).all()
             return [InstallEntry(**found) for found in founds]
         else:
-            founds = self._find_by_libid(entry.libid)
+            founds = self._find_by_libid(entry.libid, order_by=['version'], desc=True)
             best_matched = self._get_best_matched(founds, keys)  # 用于决定都有哪些field
             if best_matched is None:
                 return []
@@ -143,9 +143,9 @@ class InstallEntryTable:
                 break
         return best_match
 
-    def _find_by_libid(self, libid: str) -> list:
+    def _find_by_libid(self, libid: str, order_by: list = None, desc=True) -> list:
         assert libid is not None
-        ress = self._search({'libid': libid})
+        ress = self._search({'libid': libid}, order_by=order_by, desc=desc)
         return ress.all()
 
     def _search(self, keys: dict, order_by: list = None, desc=True) -> CursorResult:
@@ -193,7 +193,7 @@ class InstallEntryTable:
         if 'entry_id' in entry_d:
             del entry_d['entry_id']
         keys = {k: entry_d[k] for k in self.key_fields}
-        vals = {k: entry_d[k] for k in self.val_fields}
+        vals = {k: entry_d[k] for k in self.val_fields if entry_d[k] is not None}
 
         entry_request = self._search_one(keys)
         if entry_request is None:

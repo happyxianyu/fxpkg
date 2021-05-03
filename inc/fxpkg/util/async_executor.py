@@ -1,5 +1,6 @@
 import asyncio
 import atexit
+import logging
 import warnings
 import weakref
 import types
@@ -20,7 +21,6 @@ def _cleanup():
         if worker is not None:
             worker.stop_b()
 
-
 class AsyncExecutor:
     def __init__(self, workers_num=3):
         self._q = AsyncDeque()
@@ -33,7 +33,10 @@ class AsyncExecutor:
             self.waiting_flag = False
             self.running_flag = False
             self.q: AsyncDeque = q
-            self.task: asyncio.Task = asyncio.create_task(self.work())
+            self._in = []
+
+            loop = asyncio.get_event_loop()
+            self.task: asyncio.Task = loop.create_task(self.work())
             ref = weakref.ref(self)
             self._ref = ref
             _workers_ref.add(ref)
@@ -45,12 +48,27 @@ class AsyncExecutor:
 
                 # 等待 stop event 或 任务队列，如果 stop event 返回则直接终止该程序
                 self.waiting_flag = True
-                for coro in asyncio.as_completed([stop_event.wait(), q.popout()]):
-                    term = await coro
+                event = asyncio.Event()
+
+                stop_future = asyncio.ensure_future(stop_event.wait())
+                pop_future = asyncio.ensure_future(q.popout())
+                stop_future.add_done_callback(lambda _:event.set())
+                pop_future.add_done_callback(lambda _:event.set())
+
+                await event.wait()
+                if stop_future.done():
+                    pop_future.cancel()
                     self.waiting_flag = False
-                    if stop_event.is_set():
-                        return
-                    break
+                    return
+
+                term = pop_future.result()
+                #
+                # for coro in asyncio.as_completed([stop_event.wait(), q.popout()]):
+                #     term = await coro
+                #     self.waiting_flag = False
+                #     if stop_event.is_set():
+                #         return
+                #     break
 
                 if term is AsyncDeque.NoWait:
                     return
@@ -65,7 +83,7 @@ class AsyncExecutor:
                     future.set_result(result)
                 finally:
                     self.running_flag = False
-                    await asyncio.sleep(0)  # 转移控制
+                    await asyncio.sleep(0)  # 转移控
 
         async def stop(self):
             if self.stopped():
@@ -78,6 +96,7 @@ class AsyncExecutor:
 
         def stop_b(self):
             loop = asyncio.get_event_loop()
+
             if loop.is_running():
                 loop.create_task(self.stop())
             else:
@@ -108,7 +127,7 @@ class AsyncExecutor:
         if front:
             await self._q.appendleft(term)
         else:
-            await self._q.append(term)
+            await self._q.put(term)
         return future
 
     def submit_nw(self, task, front = False):
@@ -118,11 +137,15 @@ class AsyncExecutor:
         if front:
             self._q.appendleft_nw(term)
         else:
-            self._q.append_nw(term)
+            self._q.put_nw(term)
         return future
 
-    def wait_done(self):
-        self._q.wait()
+    async def run(self):
+        while True:
+            await self._q.wait_pop()
+
+    async def wait_done(self):
+        await self._q.wait_done()
 
     @property
     def wokers_num(self):
@@ -133,7 +156,6 @@ class AsyncExecutor:
             worker.terminate()
         self.workers.clear()
 
-
     async def close(self):
         workers = self.workers
         for worker in self.workers:
@@ -143,7 +165,7 @@ class AsyncExecutor:
     def close_b(self):
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            loop.create_future(self.close())
+            loop.create_task(self.close())
         else:
             loop.run_until_complete(self.close())
         self.workers.clear()

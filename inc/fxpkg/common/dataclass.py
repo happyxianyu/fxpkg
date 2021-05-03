@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 from dataclasses import dataclass
+import dataclasses
 
 from fxpkg.util import Path
 
 from .constants import InstallState
 import typing
 from .types import VersionSetBase
-
 
 
 @dataclass
@@ -42,11 +42,17 @@ class InstallConfig:
     other: dict = None  # 用于提供其他参数
 
 
+class _InstallEntryBase:
+    key_fields = ['libid', 'version', 'compiler', 'platform', 'arch', 'build_type', 'other_key']
+    path_fields = ['install_path', 'include_path', 'lib_path', 'bin_path', 'cmake_path']
+    val_fields = path_fields + ['lib_list', 'dll_list', 'dependent', 'dependency', 'install_state', 'other']
+
+
 @dataclass
-class InstallEntry:
+class InstallEntry(_InstallEntryBase):
     '''
-    用''表示空
-    None表示任意
+    ''表示任意值
+    None表示查询时任意值
     '''
     entry_id: int = None
 
@@ -76,16 +82,53 @@ class InstallEntry:
     install_state: InstallState = None
     other: dict = None  # 用于保存其他信息
 
-@dataclass
-class LibUsingInfos:
-    include_paths: list = None
-    lib_paths: list = None
-    bin_paths: list = None
-    lib_names: list = None
-    cmake_paths: list = None
 
+_default1 = lambda: dataclasses.field(default_factory=list)
+
+
+@dataclass
+class LibUsingInfo:
+    entries: dict = dataclasses.field(default_factory=dict)  # libids 到 entries的映射
+    include_paths: list = _default1()
+    lib_paths: list = _default1()
+    bin_paths: list = _default1()
+    cmake_paths: list = _default1()
+    lib_list: list = _default1()
+    dll_list: list = _default1()
+
+    def append_entry(self, entry: InstallEntry, using_cmake = False):
+        """
+        若using_cmake，且cmake_path不为None，则会忽略其他路径
+        """
+        self.entries[entry.entry_id] = entry
+        if entry.cmake_path is not None:
+            self.cmake_paths.append(entry.cmake_path)
+            if using_cmake:
+                return
+
+        if entry.include_path is not None:
+            self.include_paths.append(entry.include_path)
+        if entry.lib_path is not None:
+            self.lib_paths.append(entry.lib_path)
+        if entry.bin_path is not None:
+            self.bin_paths.append(entry.bin_path)
+        if entry.lib_list is not None:
+            lib_list_set = set(self.lib_list)
+            for lib in entry.lib_list:
+                if lib not in lib_list_set:
+                    self.lib_list.append(lib)
+        if entry.dll_list is not None:
+            dll_list_set = set(self.dll_list)
+            for dll in entry.dll_list:
+                if dll not in dll_list_set:
+                    self.dll_list.append(dll)
+
+
+del _default1
 
 del dataclass
 del Path
 del InstallState
 del VersionSetBase
+
+del _InstallEntryBase
