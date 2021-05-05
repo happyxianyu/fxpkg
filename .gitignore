@@ -26,6 +26,8 @@ build/*
 /.pytest_cache
 /test/test/log/*
 
+/inc/fxpkg/resource/config.json
+
 #END MY CONFIG
 
 

@@ -9,6 +9,9 @@ import typing
 from .types import VersionSetBase
 
 
+_default_lst = lambda: dataclasses.field(default_factory=list)
+_default_dict = lambda: dataclasses.field(default_factory=dict)
+
 @dataclass
 class InstallConfig:
     '''
@@ -39,6 +42,10 @@ class InstallConfig:
     build_path: Path = None
     tmp_path: Path = None
 
+    toolset: set = _default_dict()
+    # 环境变量
+    env_vars: dict = _default_dict()
+
     other: dict = None  # 用于提供其他参数
 
 
@@ -67,7 +74,7 @@ class InstallEntry(_InstallEntryBase):
 
     # value field
     install_path: Path = None  # 安装不可超出该目录
-    # 以下为建议安装目录
+    # 以下为建议安装目录，可为空
     include_path: Path = None
     lib_path: Path = None
     bin_path: Path = None
@@ -83,18 +90,16 @@ class InstallEntry(_InstallEntryBase):
     other: dict = None  # 用于保存其他信息
 
 
-_default1 = lambda: dataclasses.field(default_factory=list)
-
 
 @dataclass
 class LibUsingInfo:
     entries: dict = dataclasses.field(default_factory=dict)  # libids 到 entries的映射
-    include_paths: list = _default1()
-    lib_paths: list = _default1()
-    bin_paths: list = _default1()
-    cmake_paths: list = _default1()
-    lib_list: list = _default1()
-    dll_list: list = _default1()
+    include_paths: list = _default_lst()
+    lib_paths: list = _default_lst()
+    bin_paths: list = _default_lst()
+    cmake_paths: list = _default_lst()
+    lib_list: list = _default_lst()
+    dll_list: list = _default_lst()
 
     def append_entry(self, entry: InstallEntry, using_cmake = False):
         """
@@ -124,7 +129,7 @@ class LibUsingInfo:
                     self.dll_list.append(dll)
 
 
-del _default1
+del _default_lst
 
 del dataclass
 del Path

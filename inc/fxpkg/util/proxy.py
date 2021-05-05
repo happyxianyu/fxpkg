@@ -28,3 +28,9 @@ class DictObjectPorxy:
                     self[k] = v
         for k, v in d.items():
             self[k] = v
+
+    def get(self, key, default = None):
+        if key in self:
+            return self[key]
+        else:
+            return default
