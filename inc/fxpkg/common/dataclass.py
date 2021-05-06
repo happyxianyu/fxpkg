@@ -29,7 +29,7 @@ class InstallConfig:
     build_type: str = None
     other_key: dict = None
 
-    install_path: Path = None  # 安装不可超出该目录
+    install_path: Path = None  # 对于非DIRECT类型的安装，安装不可超出该目录
     # 以下为建议安装目录
     include_path: Path = None
     lib_path: Path = None
@@ -52,14 +52,15 @@ class InstallConfig:
 class _InstallEntryBase:
     key_fields = ['libid', 'version', 'compiler', 'platform', 'arch', 'build_type', 'other_key']
     path_fields = ['install_path', 'include_path', 'lib_path', 'bin_path', 'cmake_path']
-    val_fields = path_fields + ['lib_list', 'dll_list', 'dependent', 'dependency', 'install_state', 'other']
-
+    val_fields = path_fields + ['lib_list', 'dll_list', 'dependent', 'dependency', 'install_state', 'install_type' ,'other']
+    fields = key_fields+val_fields
 
 @dataclass
 class InstallEntry(_InstallEntryBase):
     '''
     ''表示任意值
     None表示查询时任意值
+    注意对于other_key和other，应当只包含标准类型
     '''
     entry_id: int = None
 
@@ -87,6 +88,7 @@ class InstallEntry(_InstallEntryBase):
     dependency: list = None
 
     install_state: InstallState = None
+    install_type:str = ''   # 默认类型，还可以是'ref'，表示安装路径为引用，卸载时将不会删除
     other: dict = None  # 用于保存其他信息
 
 

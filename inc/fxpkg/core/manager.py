@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import base64
 import copy
 import importlib
 import dataclasses
@@ -18,6 +19,7 @@ from functools import cached_property
 
 import dotenv
 import aiofile
+import more_itertools
 
 import fxpkg.package
 from fxpkg.db import *
@@ -34,10 +36,15 @@ __all__ = [
     'LibManager',
     'ConfigManager',
     'PathManager',
+    'NotSupportError',
     'InstallFailException',
     'PackageAlreadyExists',
 ]
 
+_time_start = time.time_ns()
+
+class NotSupportError(Exception):
+    pass
 
 class PackageAlreadyExists(Exception):
     pass
@@ -45,6 +52,14 @@ class PackageAlreadyExists(Exception):
 
 class InstallFailException(Exception):
     pass
+
+
+class LocalException(Exception):
+    """
+    内部使用
+    """
+    pass
+
 
 
 def add_path_to_module(m, path):
@@ -58,20 +73,20 @@ class PathManager:
         self.fxpkg_resource_path = self.fxpkg_path / 'resource'
 
         self.root_path = root_path
+        self.host_data_path = root_path / 'data/host/'
 
-        self.tmp_path = root_path/'cache/tmp'
+        self.tmp_path = root_path / 'cache/tmp'
         self.tmp_messy_path = root_path / 'cache/tmp/messy'
 
         self.pkg_install_path = root_path / 'installed'
         self.pkg_download_path = root_path / 'cache/download'
         self.pkg_build_path = root_path / 'cache/build'
 
-
         self.paths = [
             self.pkg_install_path,
 
             root_path / 'data',
-            root_path / 'data/host',
+            self.host_data_path,
             root_path / 'data/package',
 
             root_path / 'package',
@@ -94,7 +109,7 @@ class PathManager:
 
         self.paths = [Path(p) for p in self.paths]
         self.package_path = root_path / 'package'
-        self.installInfoDb_path = root_path / 'data/host/installInfo.db'
+        self.install_info_repo_path = self.host_data_path / 'install_info'
         self.tmp_messey_path = root_path / 'cache/tmp/messey'
 
         self.global_config_path = self.root_path / 'config.json'
@@ -124,19 +139,22 @@ class PathManager:
         else:
             return root_path / 'installed' / groupId / artifactId
 
+
     @staticmethod
     def make_tmp_name():
-        cur_time = datetime.datetime.now()
-        cur_time = str(cur_time).replace(':', '-')
-        nano_time = time.time_ns()
-        name = f'{cur_time}-{nano_time}'
+        count = _time_start + time.perf_counter_ns()
+        bs = count.to_bytes(count.bit_length()//8+1, 'big')
+        name = base64.b64encode(bs).decode('ascii')
         return name
 
-    def make_tmp_path(self, suffix=''):
+    def make_tmp_path(self, suffix='', prefix=''):
         messy_path = self.tmp_messy_path
-        return messy_path/(self.make_tmp_name() + suffix)
+        return messy_path / (prefix + self.make_tmp_name() + suffix)
 
     def to_relative(self, path):
+        """
+        将路径转换为相对于root_path的相对路径
+        """
         path = Path(path)
         root_path = self.root_path
         if path.is_relative_to(root_path):
@@ -145,24 +163,33 @@ class PathManager:
             return path
 
     def to_abs(self, path):
+        """
+        将路径转换为相对于root_path的绝对路径
+        """
         path = Path(path)
         if path.is_absolute():
             return path
         root_path = self.root_path
         return root_path / path
 
-    def get_pkg_path_info(self, info, lib_prefix_path=None):
+    def get_pkg_path_info(self, info, prefix=None):
+        """
+        install_path: installed/ groupid / artifactid / version
+        """
         libid = info.libid
         version = info.version
         groupid, artifactid = parse_libid(libid)
-        lib_prefix_path = lib_prefix_path or Path() / groupid / artifactid / version
+        if prefix is None:
+            lib_prefix_path = Path() / groupid / artifactid / version
+        else:
+            lib_prefix_path = Path() / groupid / artifactid / prefix
         lib_install_prefix = self.pkg_install_path / lib_prefix_path
         path_info = dict(
             install_path=lib_install_prefix,
-            include_path=lib_install_prefix/'include',
-            bin_path=lib_install_prefix/'bin',
-            lib_path=lib_install_prefix/'lib',
-            cmake_path=lib_install_prefix/'lib/cmake',
+            include_path=lib_install_prefix / 'include',
+            bin_path=lib_install_prefix / 'bin',
+            lib_path=lib_install_prefix / 'lib',
+            cmake_path=lib_install_prefix / 'lib/cmake',
             download_path=self.pkg_download_path / lib_prefix_path,
             build_path=self.pkg_build_path / lib_prefix_path,
         )
@@ -178,18 +205,10 @@ class PathManager:
 
 
 
-class LocalException(Exception):
-    """
-    内部使用
-    """
-    pass
-
-
 class ConfigManager:
     def __init__(self, pathManager: PathManager):
         self.pathManager = pathManager
         self.global_config = self.load_global_config()
-
 
     def find_tools(self, name, version=None):
         results = []
@@ -226,9 +245,10 @@ class ConfigManager:
                                 d[k] = Path(v)
                     _str2path(v)
                 elif isinstance(item, list):
-                    lst:list = item
+                    lst: list = item
                     for x in lst:
                         _str2path(x)
+
             _str2path(global_config)
 
         # proc tools
@@ -245,7 +265,6 @@ class ConfigManager:
             if tool_id is not None:
                 tools_map[tool_id] = tool
 
-
         # proc toolsets
         toolsets: dict = global_config['toolsets']
         for toolset_id, toolset in toolsets.items():
@@ -255,7 +274,6 @@ class ConfigManager:
                 assert isinstance(tool_id, str)
                 refs.append(tools_map[tool_id])
             toolsets[toolset_id] = refs
-
 
         # proc install_configs
         install_configs = global_config['install_configs']
@@ -303,7 +321,7 @@ class ConfigManager:
                 'default': default_config
             },
             'toolsets': {
-                'default' : { }
+                'default': {}
                 # toolset是一个包含多个tool的集合
                 # 如果在windows平台上，default必须包含msvc，因为需要依赖msvc运行时
                 # 例:
@@ -360,10 +378,10 @@ class ConfigManager:
             msvc_aux_build_path = msvc_install_path / 'VC/Auxiliary/Build'
 
             msvc_tool_info = {
-                'id' : None,
+                'id': None,
                 "name": "msvc",
                 "version": msvc_info['installationVersion'],
-                'line_version' : msvc_info['catalog']['productLineVersion'],
+                'line_version': msvc_info['catalog']['productLineVersion'],
                 "instance_id": msvc_info['instanceId'],
                 "display_name": msvc_info['displayName'],
                 'install_path': str(msvc_install_path),
@@ -372,13 +390,13 @@ class ConfigManager:
         return msvc_tool_infos
 
     @staticmethod
-    def _proc_inherits(d :dict):
+    def _proc_inherits(d: dict):
         """
         将存在继承的值转换为ChainMap
         """
         keys = d.keys()
         for k, v in d.items():
-            v:dict
+            v: dict
             base_ids = v.get('inherits', [])
             for base_id in base_ids:
                 base = d[base_id]
@@ -386,7 +404,6 @@ class ConfigManager:
                     d[k] = ChainMap(v, *base.maps)
                 else:
                     d[k] = ChainMap(v, base)
-
 
     @cached_property
     def host_arch(self):
@@ -412,6 +429,7 @@ class ConfigManager:
         default_install_config = self.global_config['install_configs']['default']
 
         keys = dataclasses.fields(config)
+
         def update_cond(k, v):
             return config_d.get(k) is None and k in keys
 
@@ -423,10 +441,10 @@ class ConfigManager:
 
         for tool in toolset:
             if tool['name'] == 'msvc':
-                try: # get env vals
+                try:  # get env vals
                     envfile = pathManager.make_tmp_path()
                     aux_build_path: Path = tool['aux_build_path']
-                    vcvarsall = aux_build_path/'vcvarsall.bat'
+                    vcvarsall = aux_build_path / 'vcvarsall.bat'
                     script = f'''
 cd {aux_build_path.quote()}
 call {vcvarsall.quote()} {arch}
@@ -445,8 +463,10 @@ set > {envfile.quote()}
         if entry is not None:
             keys = dataclasses.fields(entry)
             entry_d = DictObjectPorxy(entry)
-            def update_cond(k,v):
+
+            def update_cond(k, v):
                 return entry_d.get(k) is None and k in keys
+
             entry_d.update(dataclasses.asdict(config), cond=update_cond)
 
 
@@ -461,7 +481,7 @@ class LibManager:
         add_path_to_module(fxpkg.package, pathManager.package_path)
         self.pathManager = pathManager
         self.configManager = configManager
-        self.repo = InstallInfoRepository(pathManager.installInfoDb_path)
+        self.repo = InstallInfoRepository(pathManager.install_info_repo_path)
         self._executors = {
             'initial': AsyncExecutor(workers_num=1),
             'download': AsyncExecutor(workers_num=3),
@@ -492,16 +512,17 @@ class LibManager:
 
     async def _proc_config_and_entry(self, pkg: PackageBase, config: InstallConfig, entry: InstallEntry = None):
         assert config.libid is not None
-        versions = pkg.get_versions()
         if config.version is None:
-            for ver in versions:
-                config.version = ver
-                break
+            config.version = more_itertools.first(pkg.get_versions(), None)
         pathManager = self.pathManager
         configManager = self.configManager
         await configManager.fill_install_config_and_entry(config, entry)
 
     async def install_lib(self, config: InstallConfig):
+        """
+        通常不应当直接调用此方法，而是应当调用require_lib
+        config只需要提供libid即可，其他都是可选的
+        """
         pkg = self.get_package(config.libid)
         installer = pkg.make_installer()
         entry = InstallEntry()
@@ -519,9 +540,6 @@ class LibManager:
                 if isinstance(stage, Exception):
                     pass
                     # TODO: 处理异常
-                    entry.install_state = InstallState.FAIL_INSTALL
-                    self.repo.update_entry_by_key_fields(entry)
-                    return None
 
                 installer.stage = stage
                 state = entry.install_state
@@ -534,9 +552,10 @@ class LibManager:
 
         return entry
 
-    async def request_lib(self, config: InstallConfig):
+    async def request_lib(self, config: InstallConfig, installer: InstallerBase = None):
         """
         只识别key field和other，其他被忽略
+        installer用于探测依赖，对于package，应当把自身传入
         """
         pass
 

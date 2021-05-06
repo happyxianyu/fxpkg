@@ -1,8 +1,12 @@
+import json
+
 import sqlalchemy as sa
 from sqlalchemy import TypeDecorator, BLOB, TEXT
 import pickle
 
 from fxpkg.util import Path
+
+
 class PickleType(TypeDecorator):
     impl = BLOB
 
@@ -15,14 +19,28 @@ class PickleType(TypeDecorator):
         else:
             return pickle.loads(value)
 
+
 class PathType(TypeDecorator):
     impl = TEXT
 
     def process_bind_param(self, value, dialect):
         return str(value)
 
-    def process_result_value(self, value:str, dialect):
+    def process_result_value(self, value: str, dialect):
         if value is None:
             return None
         else:
             return Path(value)
+
+
+class JSONType(TypeDecorator):
+    impl = TEXT
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value)
+
+    def process_result_value(self, value: str, dialect):
+        if value is None:
+            return None
+        else:
+            return json.loads(value)

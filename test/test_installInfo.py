@@ -13,7 +13,7 @@ tmp_path = test_path / 'tmp/test_db'
 
 def test_install_info_respository():
     try:
-        path = tmp_path / 'install_info.db'
+        path = tmp_path / 'install_info'
         path.remove()
         repo = InstallInfoRepository(path, echo=True)
     except:
@@ -22,7 +22,7 @@ def test_install_info_respository():
 
 def test_get_by_id():
     try:
-        path = tmp_path / 'install_info.db'
+        path = tmp_path / 'install_info'
         repo = InstallInfoRepository(path, echo=True)
         res = repo.get_by_entry_id(0)
         print(f'res: {res}')

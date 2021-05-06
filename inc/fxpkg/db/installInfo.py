@@ -14,20 +14,15 @@ from fxpkg.common.dataclass import InstallEntry
 from fxpkg.util import Path
 
 from .util import SaDb
-from .types import PickleType, PathType
+from .types import PickleType, PathType, JSONType
 
 __all__ = ['InstallEntryTable', 'InstallInfoRepository']
 
 
+
 class InstallEntryTable:
-    key_fields = ['libid', 'version', 'compiler', 'platform', 'arch', 'build_type', 'other_key']
-    val_fields = [
-        'install_path', 'include_path', 'lib_path', 'bin_path', 'cmake_path',
-        'lib_list', 'dll_list',
-        'dependent', 'dependency',
-        'install_state',
-        'other'
-    ]
+    key_fields = InstallEntry.key_fields
+    val_fields = InstallEntry.val_fields
 
     fields = key_fields + val_fields
     all_fields = ['entry_id'] + fields
@@ -59,6 +54,7 @@ class InstallEntryTable:
             Column('dependency', PickleType, default=None),
 
             Column('install_state', Enum(InstallState)),
+            Column('install_type', Text, default=''),
 
             Column('other', PickleType, default=None),
             UniqueConstraint(*self.key_fields)
@@ -95,7 +91,6 @@ class InstallEntryTable:
 
     def find_by_key_fields(self, entry: InstallEntry, exact=True) -> typing.List[InstallEntry]:
         """
-        会按照version进行降序排序
         若exact为False，则会先搜索最佳匹配，然后再照最佳匹配进行查询
         libid是必须的
         """
@@ -105,10 +100,10 @@ class InstallEntryTable:
         keys = {k: entry_d[k] for k in key_fields if entry_d[k] is not None}
 
         if exact:
-            founds = self._search(keys, order_by=['version'], desc=True).all()
+            founds = self._search(keys).all()
             return [InstallEntry(**found) for found in founds]
         else:
-            founds = self._find_by_libid(entry.libid, order_by=['version'], desc=True)
+            founds = self._find_by_libid(entry.libid)
             best_matched = self._get_best_matched(founds, keys)  # 用于决定都有哪些field
             if best_matched is None:
                 return []
@@ -214,14 +209,17 @@ class InstallEntryTable:
 
 
 class InstallInfoRepository:
-    def __init__(self, path=':memory:', echo=False):
-        if path != ':memory:':
-            Path(path).prnt.mkdir()
-        url = 'sqlite:///' + str(path)
-        db = SaDb(url, echo=echo)
-        self._db = db
-        self._installEntry_tb = InstallEntryTable(db)
-        db.create_tables()
+    def __init__(self, path:Path=None, echo=False):
+        if path is not None:
+            path.mkdir()
+            dst_path = path/'install_entry.db'
+            install_entry_db_url = 'sqlite:///' + str(dst_path)
+        else:
+            install_entry_db_url = 'sqlite:///:memory:'
+        install_entry_db = SaDb(install_entry_db_url, echo=echo)
+        self._install_entry_db = install_entry_db
+        self._installEntry_tb = InstallEntryTable(install_entry_db)
+        install_entry_db.create_tables()
 
     def get_by_entry_id(self, entry_id: int) -> InstallEntry:
         return self._installEntry_tb.get_by_entry_id(entry_id)
