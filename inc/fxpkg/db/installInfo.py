@@ -3,6 +3,7 @@ import logging
 import dataclasses
 import typing
 
+
 import sqlalchemy as sa
 from sqlalchemy import Table, Column, Index, Integer, BLOB, Text, Enum
 from sqlalchemy import PrimaryKeyConstraint, UniqueConstraint
@@ -13,7 +14,7 @@ from fxpkg.common.constants import InstallState
 from fxpkg.common.dataclass import InstallEntry
 from fxpkg.util import Path
 
-from .util import SaDb
+from .util import SaDb, LevelDb
 from .types import PickleType, PathType, JSONType
 
 __all__ = ['InstallEntryTable', 'InstallInfoRepository']
@@ -54,7 +55,7 @@ class InstallEntryTable:
             Column('dependency', PickleType, default=None),
 
             Column('install_state', Enum(InstallState)),
-            Column('install_type', Text, default=''),
+            Column('install_type', Text, default='common'),
 
             Column('other', PickleType, default=None),
             UniqueConstraint(*self.key_fields)
@@ -164,6 +165,10 @@ class InstallEntryTable:
         return entry
 
     def update_entry_by_entry_id(self, entry: InstallEntry):
+        """
+        不存在则插入，存在则更新
+        """
+        assert entry.entry_id is not None
         conn = self.db.conn
         tb = self.tb
         entry_id = entry.entry_id
@@ -180,6 +185,7 @@ class InstallEntryTable:
     def update_entry_by_key_fields(self, entry: InstallEntry):
         """
         要求key fields全部填满
+        如果已存在，还会更新entry_id
         """
         assert all(hasattr(entry, attr) for attr in self.key_fields)
         conn = self.db.conn
@@ -208,6 +214,7 @@ class InstallEntryTable:
         return True
 
 
+
 class InstallInfoRepository:
     def __init__(self, path:Path=None, echo=False):
         if path is not None:
@@ -220,6 +227,8 @@ class InstallInfoRepository:
         self._install_entry_db = install_entry_db
         self._installEntry_tb = InstallEntryTable(install_entry_db)
         install_entry_db.create_tables()
+
+        self._preferred_setting_db = LevelDb(path/'preferred_setting')
 
     def get_by_entry_id(self, entry_id: int) -> InstallEntry:
         return self._installEntry_tb.get_by_entry_id(entry_id)
@@ -236,17 +245,27 @@ class InstallInfoRepository:
 
     def find_by_key_fields(self, entry: InstallEntry, exact=True) -> typing.List[InstallEntry]:
         """
-        会按照version进行降序排序
         若exact为False，则会先搜索最佳匹配，然后再照最佳匹配进行查询
         libid是必须的
         """
         return self._installEntry_tb.find_by_key_fields(entry, exact)
 
     def update_entry_by_entry_id(self, entry: InstallEntry):
-        return self._installEntry_tb.update_entry_by_entry_id(entry)
+        self._installEntry_tb.update_entry_by_entry_id(entry)
+        # 要求至少设置一个preferred version
+        if self.get_preferred_version(entry.libid) is None:
+            self.set_preferred_version(entry.libid, entry.version)
 
     def update_entry_by_key_fields(self, entry: InstallEntry):
         """
         要求key fields全部填满
         """
-        return self._installEntry_tb.update_entry_by_key_fields(entry)
+        self._installEntry_tb.update_entry_by_key_fields(entry)
+        if self.get_preferred_version(entry.libid) is None:
+            self.set_preferred_version(entry.libid, entry.version)
+
+    def set_preferred_version(self, libid: str, version: str):
+        self._preferred_setting_db.puts(libid, version)
+
+    def get_preferred_version(self, libid: str):
+        return self._preferred_setting_db.gets(libid)
