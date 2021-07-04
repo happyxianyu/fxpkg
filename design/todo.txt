@@ -1,43 +1,16 @@
-
-安装数据查询，''可以匹配任何值
-安装改为异步生成器方式
-path保存为相对路径
-
-例:
-yield 'download'
-yield 'build'
-yield 'configure'
-yield 'install'
-
-
-
-每个库安装的顺序执行次序:
-下载和安装依赖，配置，构建，安装
-
-每步信息填入:
-(name, version, compiler, platform, arch, build_type)
-下载和安装依赖
-
-(name, version, compiler, platform, arch, build_type, 
-install_path, others)
-配置
-
-(name, version, compiler, platform, arch, build_type, 
-install_path, others)
-构建
-
-(name, version, compiler, platform, arch, build_type, 
-install_path, others)
-安装
+依赖版本选择策略:
+优先从已安装版本选择最新的适合的版本
+如果未找到已安装版本，则安装最新版
+若存在菱形依赖，则要检测是否存在版本冲突
+若存在版本冲突，则需要安装包重新决定各个节点的版本
+如果安装包无法决定，则升级全部版本，再次尝试解析依赖
+如果还是存在冲突，则让用户解决，如果用户无法解决，则安装失败
 
 
 
 
 
 
-任何一步发生错误，都应当尝试是否能自动修复，如果不能则尝试让用户手动修复，否则安装失败，输出错误信息
 
 
 
-None表示任意
-''表示空

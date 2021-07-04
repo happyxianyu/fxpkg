@@ -2,6 +2,7 @@ import logging
 import pytest
 
 from fxpkg import *
+import asyncio
 
 print = logging.debug
 

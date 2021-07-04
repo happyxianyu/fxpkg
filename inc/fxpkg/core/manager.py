@@ -27,7 +27,7 @@ from fxpkg.common.dataclass import *
 from fxpkg.common import *
 from fxpkg.util import *
 
-from .package import *
+from fxpkg.interface.package import *
 from .output import *
 
 from .util import parse_libid, get_sys_info
@@ -514,7 +514,6 @@ class LibManager:
         assert config.libid is not None
         if config.version is None:
             config.version = more_itertools.first(pkg.get_versions(), None)
-        pathManager = self.pathManager
         configManager = self.configManager
         await configManager.fill_install_config_and_entry(config, entry)
 
@@ -552,15 +551,22 @@ class LibManager:
 
         return entry
 
-    async def request_lib(self, config: InstallConfig, installer: InstallerBase = None):
+    async def request_lib(self, config: InstallConfig):
         """
         只识别key field和other，其他被忽略
-        installer用于探测依赖，对于package，应当把自身传入
         """
         pass
 
     async def request_libs(self, configs: typing.List[InstallConfig]):
         return [await self.request_lib(config) for config in configs]
+
+    async def acquire(self, installer:InstallerBase, libid: str):
+        """
+        安装包需要依赖时应当调用此接口
+        会从installer的dependency中自动选择合适的版本
+
+        """
+        pass
 
     async def uninstall_lib(self, info: InstallEntry):
         """

@@ -14,13 +14,13 @@ _default_dict = lambda: dataclasses.field(default_factory=dict)
 
 @dataclass
 class InstallConfig:
-    '''
+    """
     example:
 
     data_path = 'data/package/groupid/artifactid'
     download_path = 'cache/download/groupid/artifactid'
     build_path = 'cache/build/groupid/artifactid'
-    '''
+    """
     libid: str = None
     version: typing.Union[str, VersionSetBase] = None
     compiler: str = None

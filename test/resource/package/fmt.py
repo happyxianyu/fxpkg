@@ -6,6 +6,7 @@ import traceback
 from io import StringIO
 
 from fxpkg import *
+from fxpkg.interface import *
 
 
 class Installer(InstallerBase):
