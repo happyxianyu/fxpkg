@@ -1,8 +1,11 @@
 import asyncio
 import random
 import time
+import logging
 
-from fxpkg.util.async_executor import AsyncExecutor
+from fxpkg.util.coro_exec import CoroExecutor
+
+print = logging.info
 
 async def assignment(i, t):
     print(f'id: {i}, time: {t}, begin')
@@ -12,7 +15,7 @@ async def assignment(i, t):
 
 
 async def main():
-    executor = AsyncExecutor()
+    executor = CoroExecutor()
     ts = [random.random()*3 for i in range(20)]
     time_start = time.time()
     futures = [await executor.submit(assignment(i, ts[i])) for i in range(20)]

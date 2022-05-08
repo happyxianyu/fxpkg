@@ -1,3 +1,7 @@
+"""
+Depracated
+"""
+
 import asyncio
 import atexit
 import warnings
@@ -5,7 +9,7 @@ import weakref
 
 import more_itertools
 
-from .async_queue import AsyncDeque
+from .coro_queue import CoroDeque
 from .dag import DAGNode
 
 
@@ -42,7 +46,7 @@ class AsyncPipelineStage:
     class RunningData:
         def __init__(self):
             self.uncomplete_num = 0
-            self.out_q = AsyncDeque()
+            self.out_q = CoroDeque()
             self.done_event = asyncio.Event()
             self.next_stage = None
 
@@ -76,7 +80,7 @@ class AsyncPipelineStage:
         next_stage为串联关系的stage，会设置out_callback为connector，将输出传递到下一个stage
         scheduler用于安排执行顺序
         '''
-        self._in_q = AsyncDeque() #这里用deque是为了能够插队
+        self._in_q = CoroDeque() #这里用deque是为了能够插队
         self.loop = asyncio.get_event_loop()
 
         self._running_data = self.RunningData()

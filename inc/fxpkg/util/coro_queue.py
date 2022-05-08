@@ -3,8 +3,9 @@ import logging
 from collections import deque
 from contextlib import contextmanager, asynccontextmanager
 
+__all__ = ['CoroDeque', 'CoroEvent']
 
-class AsyncEventEx(asyncio.Event):
+class CoroEvent(asyncio.Event):
     def __init__(self):
         self.wait_num = 0
         super().__init__()
@@ -15,7 +16,7 @@ class AsyncEventEx(asyncio.Event):
         self.wait_num -= 1
 
 
-class AsyncDeque:
+class CoroDeque:
     class NoWait:
         pass
 

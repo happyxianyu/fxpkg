@@ -538,11 +538,11 @@ class LibManager:
         self.configManager = configManager
         self.repo = InstallInfoRepository(pathManager.install_info_repo_path)
         self._executors = {
-            'initial': AsyncExecutor(workers_num=1),
-            'download': AsyncExecutor(workers_num=3),
-            'configure': AsyncExecutor(workers_num=1),
-            'build': AsyncExecutor(workers_num=1),
-            'install': AsyncExecutor(workers_num=1),
+            'initial': CoroExecutor(workers_num=1),
+            'download': CoroExecutor(workers_num=3),
+            'configure': CoroExecutor(workers_num=1),
+            'build': CoroExecutor(workers_num=1),
+            'install': CoroExecutor(workers_num=1),
         }
 
     def get_package(self, libid) -> PackageBase:

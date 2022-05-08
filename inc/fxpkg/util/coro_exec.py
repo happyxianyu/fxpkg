@@ -1,15 +1,10 @@
 import asyncio
 import atexit
-import logging
-import warnings
 import weakref
-import types
 
-import more_itertools
+from .coro_queue import CoroDeque
 
-from .async_queue import AsyncDeque
-
-__all__ = ['AsyncExecutor']
+__all__ = ['CoroExecutor']
 
 _workers_ref = set()
 
@@ -21,9 +16,17 @@ def _cleanup():
         if worker is not None:
             worker.stop_b()
 
-class AsyncExecutor:
+class CoroExecutor:
+    """
+    A coroutine executor
+
+    suffix meaning:
+    a: async version
+    b: block version
+    nw: no wait
+    """
     def __init__(self, workers_num=3):
-        self._q = AsyncDeque()
+        self._q = CoroDeque()
         self.workers = [self.Worker(self._q) for _ in range(workers_num)]
 
     class Worker:
@@ -32,7 +35,7 @@ class AsyncExecutor:
             self.stop_event = asyncio.Event()
             self.waiting_flag = False
             self.running_flag = False
-            self.q: AsyncDeque = q
+            self.q: CoroDeque = q
             self._in = []
 
             loop = asyncio.get_event_loop()
@@ -70,7 +73,7 @@ class AsyncExecutor:
                 #         return
                 #     break
 
-                if term is AsyncDeque.NoWait:
+                if term is CoroDeque.NoWait:
                     return
                 task, future = term
 
