@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 import asyncio
+import typing
+
 from fxpkg.common import *
 
 
@@ -9,21 +11,21 @@ class InstallerBase:
         self.stage: str = 'initial'
         self.config: InstallConfig = None
         self.entry: InstallEntry = None
-        self.required_map = {}  # libid, installNode
-        self.reserved = None
+        self.dependency = {}  # libid, installerBase
 
     async def install(self, config: InstallConfig, entry: InstallEntry):
         yield
 
     def get_dependency(self):
         """
+        保证config已经设置
         {
-        libid : version_range
+        libid : VersionSet
         }
         """
         return {}
 
-    async def require(self, libid: str):
+    async def acquire(self, libid: str):
         pass
 
     def submit_task(self, task) -> asyncio.Future:
@@ -37,7 +39,7 @@ class PackageBase:
     def __init__(self, libManager: 'LibManager'):
         self.libManager = libManager
 
-    def get_versions(self) -> VersionSetBase:
+    def get_versions(self) -> typing.List[str]:
         """
         返回该package安装版本
         """
@@ -49,7 +51,7 @@ class PackageBase:
         """
         return []
 
-    def make_installer(self) -> InstallerBase:
+    def make_installer(self, version=None) -> InstallerBase:
         '''
         创建InstallerBase的子类的一个实例
         '''

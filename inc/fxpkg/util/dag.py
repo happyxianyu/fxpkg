@@ -83,8 +83,8 @@ class DAGNode:
 
 class DiDAGNode:
     def __init__(self):
-        self.succs = set()
-        self.prevs = set()
+        self.succs = []
+        self.prevs = []
         self.weight = 1  # 表示该节点开销，开销小的会被先执行
         self._copied = None # 用于拷贝节点时使用
 
@@ -103,8 +103,8 @@ class DiDAGNode:
         return len(self.succs) == 0
 
     def add_succ(self, succ: 'DiDAGNode'):
-        succ.prevs.add(self)
-        self.succs.add(succ)
+        succ.prevs.append(self)
+        self.succs.append(succ)
 
     def add_succs(self, succs):
         map(self.add_succ, succs)
@@ -156,7 +156,7 @@ class DiDAGNode:
 
 class DiDAG:
     def __init__(self, sources):
-        self.sources = set(sources)
+        self.sources = list(sources)
 
     def copy(self):
         DiDAGNode.copy_dag(self.sources)

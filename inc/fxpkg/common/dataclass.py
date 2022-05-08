@@ -6,7 +6,6 @@ from fxpkg.util import Path
 
 from .constants import InstallState
 import typing
-from .types import VersionSetBase
 
 
 _default_lst = lambda: dataclasses.field(default_factory=list)
@@ -22,7 +21,7 @@ class InstallConfig:
     build_path = 'cache/build/groupid/artifactid'
     """
     libid: str = None
-    version: typing.Union[str, VersionSetBase] = None
+    version: str = None
     compiler: str = None
     platform: str = None
     arch: str = None
@@ -136,6 +135,5 @@ del _default_lst
 del dataclass
 del Path
 del InstallState
-del VersionSetBase
 
 del _InstallEntryBase

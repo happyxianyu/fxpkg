@@ -20,14 +20,16 @@ from functools import cached_property
 import dotenv
 import aiofile
 import more_itertools
+import networkx as nx
 
 import fxpkg.package
 from fxpkg.db import *
 from fxpkg.common.dataclass import *
 from fxpkg.common import *
 from fxpkg.util import *
-
+from fxpkg.util.dag import *
 from fxpkg.interface.package import *
+
 from .output import *
 
 from .util import parse_libid, get_sys_info
@@ -43,8 +45,10 @@ __all__ = [
 
 _time_start = time.time_ns()
 
+
 class NotSupportError(Exception):
     pass
+
 
 class PackageAlreadyExists(Exception):
     pass
@@ -59,7 +63,6 @@ class LocalException(Exception):
     内部使用
     """
     pass
-
 
 
 def add_path_to_module(m, path):
@@ -139,11 +142,10 @@ class PathManager:
         else:
             return root_path / 'installed' / groupId / artifactId
 
-
     @staticmethod
     def make_tmp_name():
         count = _time_start + time.perf_counter_ns()
-        bs = count.to_bytes(count.bit_length()//8+1, 'big')
+        bs = count.to_bytes(count.bit_length() // 8 + 1, 'big')
         name = base64.b64encode(bs).decode('ascii')
         return name
 
@@ -202,7 +204,6 @@ class PathManager:
             logging.warning('Fail to delete tmp')
         except IOError:
             pass
-
 
 
 class ConfigManager:
@@ -470,6 +471,60 @@ set > {envfile.quote()}
             entry_d.update(dataclasses.asdict(config), cond=update_cond)
 
 
+class InstallNode:
+    def __init__(self, config: InstallConfig, pkg: PackageBase = None):
+        self.config = config
+        self.pkg = pkg
+        self.installer: InstallerBase = None
+        self.version_set = VersionSet(closed(-inf, inf))  # 合适的版本，初始为任意版本
+        self.decided_edge_num = 0  # 已经决定过版本的边
+
+    def acquire_installer(self):
+        if self.installer is None:
+            self.installer = self.pkg.make_installer(self.config.version)
+        return self.installer
+
+    def __eq__(self, other):
+        return self.config == other.config
+
+    def __hash__(self):
+        return hash(self.config.libid)
+
+
+class InstallDAG:
+    def __init__(self, libManager: 'LibManager', config: InstallConfig):
+        self.libManager = libManager
+        self.graph = graph = nx.DiGraph()
+        self.nodes = nodes = {}  # libid: node
+        def go(libid):
+            if libid in nodes:
+                return
+            config = InstallConfig(libid)
+            pkg = libManager.get_package(libid)
+            nodes[libid] = node = InstallNode(config, pkg)
+            pkg = node.pkg
+            for libid1 in pkg.get_dependency():
+                graph.add_edge(libid, libid1)
+                go(libid1)
+
+        libid = config.libid
+        go(libid)
+        src = nodes[libid]
+        src.config = config
+        self.src: InstallNode = src
+
+    def determine_versions(self):
+        graph = self.graph.copy()
+        src = self.src
+        deps = src.acquire_installer().get_dependency()
+        for id_, ver_set in deps:
+            # TODO
+            pass
+
+
+
+
+
 class LibManager:
     def __init__(self,
                  pathManager: 'PathManager',
@@ -560,7 +615,7 @@ class LibManager:
     async def request_libs(self, configs: typing.List[InstallConfig]):
         return [await self.request_lib(config) for config in configs]
 
-    async def acquire(self, installer:InstallerBase, libid: str):
+    async def acquire(self, installer: InstallerBase, libid: str):
         """
         安装包需要依赖时应当调用此接口
         会从installer的dependency中自动选择合适的版本
