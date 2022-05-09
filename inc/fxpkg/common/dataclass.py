@@ -46,7 +46,7 @@ class InstallConfig:
     # 以下为建议安装目录
     include_path: Path = None
     lib_path: Path = None
-    bin_path: Path = None
+    bin_path: Path = None   # dll path
     cmake_path: Path = None
 
     data_path: Path = None  # 该目录下的所有文件将持久保存

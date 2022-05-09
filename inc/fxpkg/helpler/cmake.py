@@ -34,7 +34,9 @@ def get_cmake_generator(config:InstallConfig):
 
 
 
-def make_cmake_presets(config:InstallConfig) -> dict:
+def make_cmake_presets(config:InstallConfig, install_path=None) -> dict:
+    if install_path is None:
+        install_path = config.install_path
     cmake_generator = config.cmake.generator
     cmake_presets = {
         'version': 2,
@@ -49,10 +51,10 @@ def make_cmake_presets(config:InstallConfig) -> dict:
                 "binaryDir": '.fxpkg/binary',
                 'cacheVariables': {
                     'CMAKE_INSTALL_PREFIX': {
-                        'value': str(config.install_path)
+                        'value': str(install_path)
                     },
                     'CMAKE_PREFIX_PATH': {
-                        'value': str(config.install_path)
+                        'value': str(install_path)
                     },
                 },
             },

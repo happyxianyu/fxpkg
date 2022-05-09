@@ -10,7 +10,6 @@ init_fxpkg(root)
 from fxpkg.all import *
 
 
-
 class BuildExecutor:
     def __init__(self):
         self.donwload_executor = CoroExecutor()
@@ -32,6 +31,7 @@ global run_light_proc
 global run_heavy_proc
 
 
+
 class CMakePkgMgr:
     def __init__(self, libid, git_url = None):
         if git_url is None:
@@ -43,24 +43,37 @@ class CMakePkgMgr:
     async def request(self, config:InstallConfig):
         libid = self.libid
         git_url = self.git_url
-        repo_path = config.download_path
+        build_type = config.build_type
         version = config.version
+
+        repo_path = config.download_path
+        build_path = (config.build_path/version/build_type).absolute()
+        install_path = config.install_path/version/build_type
+        
+        for p in (build_path, install_path):
+            p.mkdir()
+
         if not repo_path.exists():
-            await run_download(run_shellscript_async(f'git clone --depth=1 -b v{version} {git_url} {libid}', cwd = path.cache))
+            await run_download(run_shellscript_async(f'git clone --depth=1 -b v{version} {git_url} {libid}', cwd = repo_path.prnt))
+            assert repo_path.exists()
         else:   # fetch version and checkout
             await run_shellscript_async(f'''
 git fetch --depth=1 origin +refs/tags/{version}:refs/tags/{version}
 git checkout tags/{version}''', cwd=repo_path)
-        assert(repo_path.exists())
-        cmake_presets = make_cmake_presets(config)
+        cmake_presets = make_cmake_presets(config, install_path)
         with (repo_path/'CMakeUserPresets.json').open('w', encoding='utf8') as fw:
             fw.write(json.dumps(cmake_presets, ensure_ascii=False,indent=4))
         assert (repo_path/'CMakeUserPresets.json').exists()
-        await run_light_proc(run_cmd_async('cmake . -B .fxpkg/build --preset=real', cwd=repo_path))
-        assert (repo_path/'.fxpkg/build').exists()
-        await run_heavy_proc(run_cmd_async('cmake --build .fxpkg/build', cwd=repo_path))
-        await run_light_proc(run_cmd_async(f'cmake --build .fxpkg/build --target install --config {config.build_type}', cwd=repo_path))
+        await run_light_proc(run_cmd_async(f'cmake . -B {build_path} --preset=real', cwd=repo_path))
+        assert build_path.exists()
+        await run_heavy_proc(run_cmd_async(f'cmake --build {build_path}', cwd=repo_path))
+        await run_light_proc(run_cmd_async(f'cmake --build {build_path} --target install --config {config.build_type}', cwd=repo_path))
         installEntry = InstallEntry()
+        installEntry.install_path = install_path
+        installEntry.include_path = install_path/'include'
+        installEntry.lib_path = install_path/'lib'
+        installEntry.cmake_path = install_path/'lib/cmake'
+        return installEntry
 
 
 
