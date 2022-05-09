@@ -49,16 +49,53 @@ class CMakePkgMgr(PackageMgrBase):
         await self.configure()
 
         # build
-        await run_heavy_proc(run_cmd_async(f'cmake --build {build_path}', cwd=repo_path))
+        await self.build()
 
         # install
-        await run_light_proc(run_cmd_async(f'cmake --build {build_path} --target install --config {build_type}', cwd=repo_path))
+        await self.install()
         install_entry = InstallEntry()
         install_entry.install_path = install_path
         install_entry.include_path = install_path/'include'
         install_entry.lib_path = install_path/'lib'
         install_entry.cmake_path = install_path/'lib/cmake'
         return install_entry
+
+    def get_install_entry(self, config:InstallConfig = None) -> InstallEntry:
+        self._set_config(config)
+        config = self.config
+        install_path = self.install_path
+        install_entry = InstallEntry()
+        install_entry.install_path = install_path
+        install_entry.include_path = install_path/'include'
+        install_entry.lib_path = install_path/'lib'
+        install_entry.cmake_path = install_path/'lib/cmake'
+        return install_entry
+
+
+    async def install(self, config:InstallConfig = None):
+        self._set_config(config)
+        config = self.config
+        build_type = config.build_type
+        repo_path = self.repo_path
+        build_path = self.build_path
+        install_path = self.install_path
+        bctx = self.bctx
+        run_light_proc = bctx.run_light_proc
+        run_cmd_async = bctx.run_cmd_async
+        self._set_config(config)
+        await run_light_proc(run_cmd_async(f'cmake --build {build_path} --target install --config {build_type}', cwd=repo_path))
+
+
+    async def build(self, config:InstallConfig = None):
+        self._set_config(config)
+        config = self.config
+        repo_path = self.repo_path
+        build_path = self.build_path
+        bctx = self.bctx
+        run_cmd_async = bctx.run_cmd_async
+        run_heavy_proc = bctx.run_heavy_proc
+        await run_heavy_proc(run_cmd_async(f'cmake --build {build_path}', cwd=repo_path))
+
 
     async def configure(self, config: InstallConfig = None):
         self._set_config(config)
