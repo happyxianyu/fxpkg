@@ -11,6 +11,20 @@ import typing
 _default_lst = lambda: dataclasses.field(default_factory=list)
 _default_dict = lambda: dataclasses.field(default_factory=dict)
 
+
+
+
+@dataclass
+class ToolSet:
+    msvc_infos:list = dataclasses.field(default_factory=list)
+
+
+
+@dataclass
+class CmakeConfig:
+    generator:str = None
+
+
 @dataclass
 class InstallConfig:
     """
@@ -41,11 +55,15 @@ class InstallConfig:
     build_path: Path = None
     tmp_path: Path = None
 
-    toolset: set = _default_dict()
+    toolset: ToolSet = ToolSet()
     # 环境变量
     env_vars: dict = _default_dict()
 
     other: dict = None  # 用于提供其他参数
+
+
+    cmake:CmakeConfig = CmakeConfig() # info for cmake
+    
 
 
 class _InstallEntryBase:
@@ -60,6 +78,7 @@ class InstallEntry(_InstallEntryBase):
     ''表示任意值
     None表示查询时任意值
     注意对于other_key和other，应当只包含标准类型
+    最重要的是install_path, include_path, lib_path, cmake_path
     '''
     entry_id: int = None
 

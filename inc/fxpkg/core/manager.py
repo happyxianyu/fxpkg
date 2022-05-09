@@ -1,14 +1,11 @@
 # -*- coding:utf-8 -*-
 import base64
-import copy
 import importlib
 import dataclasses
 import io
 import json
 import logging
 import typing
-import datetime
-import random
 import os
 import time
 import platform
@@ -33,30 +30,15 @@ from fxpkg.interface.package import *
 from .output import *
 
 from .util import parse_libid, get_sys_info
+from fxpkg.exception import *
 
 __all__ = [
     'LibManager',
     'ConfigManager',
     'PathManager',
-    'NotSupportError',
-    'InstallFailException',
-    'PackageAlreadyExists',
 ]
 
 _time_start = time.time_ns()
-
-
-class NotSupportError(Exception):
-    pass
-
-
-class PackageAlreadyExists(Exception):
-    pass
-
-
-class InstallFailException(Exception):
-    pass
-
 
 class LocalException(Exception):
     """

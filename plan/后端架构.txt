@@ -77,22 +77,21 @@ ext: 扩展模块，为C++构建程序如cmake提供辅助
 安装目录组织:
 fxpkg.py    主程序
 installed   库安装目录
-- groupids
--- artifactIds    
---- version
----- compiler
------- platforms   
-------- archs     
---------- include
---------- lib
---------- bin
----------- cmake
+- libid    
+-- version
+--- compiler
+----- platforms   
+------ archs     
+-------- include
+-------- lib
+-------- bin
+--------- cmake
+
 
 data        保存的数据
 -host       本体数据
 -package  安装器保存的数据
---groupids
----artifactIds
+--libid
 
 package   包裹
 -groupids
@@ -101,8 +100,7 @@ config      配置
 -config.json   默认配置
 -host       本体配置，包括一些默认值
 -package
---groupids
----artifactIds
+--libid
 
 log         日志
 -host       本体日志

@@ -1,6 +1,7 @@
 import enum
 from enum import Enum, auto
 
+__all__ = ['InstallState']
 
 class InstallState(Enum):
     INTACT = auto()
@@ -11,6 +12,4 @@ class InstallState(Enum):
     FAIL_UNINSTALL = auto()
 
 
-del Enum
-del enum
-del auto
+
