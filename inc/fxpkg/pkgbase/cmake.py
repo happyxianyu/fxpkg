@@ -1,4 +1,5 @@
 import json
+from aiofile import AIOFile
 from fxpkg.common import *
 from fxpkg.helpler import *
 from fxpkg.buildctx import *
@@ -49,8 +50,8 @@ class CMakePkgMgr:
 
         # configure
         cmake_presets = make_cmake_presets(config, install_path)
-        with (repo_path/'CMakeUserPresets.json').open('w', encoding='utf8') as fw:
-            fw.write(json.dumps(cmake_presets, ensure_ascii=False,indent=4))
+        async with AIOFile(repo_path/'CMakeUserPresets.json', 'w') as fw:
+            await fw.write(json.dumps(cmake_presets, ensure_ascii=False,indent=4))
         assert (repo_path/'CMakeUserPresets.json').exists()
         await run_light_proc(run_cmd_async(f'cmake . -B {build_path} --preset=real', cwd=repo_path))
 

@@ -9,6 +9,7 @@ from cbutil import CoroExecutor, Path
 
 from fxpkg.helpler import *
 from fxpkg.common import *
+from .core import *
 
 __all__ = ['BuildContext', 'make_build_ctx']
 
@@ -40,6 +41,7 @@ class BuildExecutor:
 class PathInfoEx(PathInfo):
     installed:Path = None
     config:Path = None
+    package:Path = None
 
 
 
@@ -55,8 +57,11 @@ class BuildContext(BuildExecutor, ResContext):
         self.path = path = PathInfoEx(
             installed = path.cache/'installed',
             config = path.data/'config',
+            package = path.data/'package',
             **dataclasses.asdict(path)
         )
+
+        add_package_path(path.package)
         self._tpl_install_config:InstallConfig = None   # template install config
 
     def make_config(self, libid:str):
@@ -70,11 +75,15 @@ class BuildContext(BuildExecutor, ResContext):
         config.cmake.generator = get_cmake_generator(config)
         return config
 
+    def get_package_mgr(self, libid:str):
+        return get_package_mgr(self, libid)
+
+
 
 async def make_build_ctx(root:Path):
     bctx = BuildContext(root, _direct_call= False)
     config = InstallConfig()
-    config.toolset.msvc_infos = msvc_infos = await get_msvc_infos(bctx)
+    config.toolset.msvc_infos = await get_msvc_infos(bctx)
     bctx._tpl_install_config = config
     return bctx
 

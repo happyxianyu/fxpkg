@@ -7,18 +7,16 @@ proj_path = Path(__file__).prnt.prnt
 test_path = proj_path/'tmp/v/demo'
 
 add_package_path(Path(__file__).prnt/'pkgs')
-print(import_package('gflags').A)
-
 
 
 
 async def main():
     libid = 'gflags'
     bctx = await make_build_ctx(test_path)
-    cmake_pkg = CMakePkgMgr(bctx, 'gflags')
+    pkg_mngr = bctx.get_package_mgr(libid)
     config = bctx.make_config(libid)
-    config.version = '2.2.1'
-    await cmake_pkg.request(config)
+    config.version = '2.2.0'
+    await pkg_mngr.request(config)
 
     
 
