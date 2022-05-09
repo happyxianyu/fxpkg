@@ -2,7 +2,13 @@ import json
 import os
 from fxpkg.internal import *
 
-# TODO
+
+__all__ = [
+    'find_vswhere_path',
+    'get_msvc_infos'
+]
+
+
 
 def find_vswhere_path() -> Path:
     msvc_installer_path = Path() / os.environ['ProgramFiles(x86)'] / 'Microsoft Visual Studio/Installer'
@@ -22,8 +28,6 @@ async def get_msvc_infos():
         log.warning(e)
         return []
         
-
-
 
 
 

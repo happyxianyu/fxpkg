@@ -1,5 +1,7 @@
 import platform
 
+
+
 def get_sys_info():
     '''
     返回(platform, arch)
@@ -7,3 +9,9 @@ def get_sys_info():
     uname = platform.uname()
     return uname.system.lower(), uname.machine.lower()
     
+
+def make_config(libid:str):
+    # TODO
+    pass
+
+
