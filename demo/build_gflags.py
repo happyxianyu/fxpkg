@@ -9,14 +9,14 @@ test_path = proj_path/'tmp/v/demo'
 add_package_path(Path(__file__).prnt/'pkgs')
 
 
-
 async def main():
     libid = 'gflags'
     bctx = await make_build_ctx(test_path)
     pkg_mngr = bctx.get_package_mgr(libid)
     config = bctx.make_config(libid)
     config.version = '2.2.0'
-    await pkg_mngr.request(config)
+    entry = await pkg_mngr.request(config)
+    print(entry)
 
     
 

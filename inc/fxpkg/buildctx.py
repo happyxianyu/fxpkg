@@ -1,3 +1,4 @@
+import typing
 import logging
 import dataclasses
 from dataclasses import dataclass
@@ -10,6 +11,8 @@ from cbutil import CoroExecutor, Path
 from fxpkg.helpler import *
 from fxpkg.common import *
 from .core import *
+if typing.TYPE_CHECKING:
+    from .pkgbase.base import PackageMgrBase
 
 __all__ = ['BuildContext', 'make_build_ctx']
 
@@ -75,8 +78,14 @@ class BuildContext(BuildExecutor, ResContext):
         config.cmake.generator = get_cmake_generator(config)
         return config
 
-    def get_package_mgr(self, libid:str):
+    def get_package_mgr(self, libid:str) -> 'PackageMgrBase':
         return get_package_mgr(self, libid)
+
+    def add_package_mgr(self, mgr_path):
+        path = self.path
+        mgr_path = Path(mgr_path)
+        mgr_path.copy_to(path.package, is_prefix=True)
+
 
 
 
