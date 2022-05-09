@@ -1,6 +1,6 @@
 import typing
 if typing.TYPE_CHECKING:
-    from fxpkg import *
+    from fxpkg import InstallConfig, InstallEntry
 
 __all__ = ['PackageMgrBase']
 
