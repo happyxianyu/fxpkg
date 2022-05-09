@@ -59,7 +59,7 @@ class InstallConfig:
     # 环境变量
     env_vars: dict = _default_dict()
 
-    other: dict = None  # 用于提供其他参数
+    other: object = None  # 用于提供其他参数
 
 
     cmake:CmakeConfig = CmakeConfig() # info for cmake
