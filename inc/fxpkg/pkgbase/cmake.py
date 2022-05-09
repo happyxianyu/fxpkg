@@ -1,16 +1,17 @@
 import json
-from rmgr.all import *
 from fxpkg.common import *
 from fxpkg.helpler import *
-from fxpkg.config import *
+from fxpkg.buildctx import *
+
 
 
 
 class CMakePkgMgr:
-    def __init__(self, libid, git_url = None):
+    def __init__(self, bctx:BuildContext, libid:str, git_url = None):
         if git_url is None:
             git_url = f'https://github.com/{libid}/{libid}.git'
-            
+        
+        self.bctx = bctx
         self.libid = libid
         self.git_url = git_url
 
@@ -33,6 +34,12 @@ class CMakePkgMgr:
         repo_path = self.repo_path
         build_path = self.build_path
         install_path = self.install_path
+        bctx = self.bctx
+        run_light_proc = bctx.run_light_proc
+        run_cmd_async = bctx.run_cmd_async
+        run_heavy_proc = bctx.run_heavy_proc
+
+
         
         for p in (build_path, install_path):
             p.mkdir()
@@ -67,6 +74,11 @@ class CMakePkgMgr:
         version = config.version
         repo_path = self.repo_path
 
+        bctx = self.bctx
+        run_download = bctx.run_download
+        run_shellscript_async = bctx.run_shellscript_async
+        run_light_download = bctx.run_light_download
+
         if not repo_path.exists():
             await run_download(run_shellscript_async(f'git clone --depth=1 -b v{version} {git_url} {libid}', cwd = repo_path.prnt))
             assert repo_path.exists()
@@ -78,4 +90,6 @@ git checkout tags/v{version}''', cwd=repo_path))
     def _set_config(self, config:InstallConfig):
         if config is not None:
             self.set_config(config)
+
+
 

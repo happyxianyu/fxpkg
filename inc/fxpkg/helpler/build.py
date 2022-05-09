@@ -1,6 +1,6 @@
 import platform
-
-
+from .msvc import *
+from .cmake import *
 
 def get_sys_info():
     '''
@@ -10,8 +10,6 @@ def get_sys_info():
     return uname.system.lower(), uname.machine.lower()
     
 
-def make_config(libid:str):
-    # TODO
-    pass
+
 
 
