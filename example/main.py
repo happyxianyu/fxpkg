@@ -11,12 +11,23 @@ if(len(argv)<2):
 
 libid = argv[1]
 
+if(len(argv)>2):
+    version = argv[2]
+else:
+    version = None
+
+# libid = 'boost'
+# version = '1.78.0'
+
+libid = 'gflags'
+
 
 async def main():
     root = Path(__file__).prnt
     bctx = await make_build_ctx(root)
     mgr = bctx.get_package_mgr(libid)
     config = bctx.make_config(libid)
+    config.version = version
     entry = await mgr.request(config)
     bctx.log.info(entry)
 

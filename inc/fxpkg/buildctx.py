@@ -13,6 +13,7 @@ from fxpkg.common import *
 from .core import *
 if typing.TYPE_CHECKING:
     from .pkgbase.base import PackageMgrBase
+import platform
 
 __all__ = ['BuildContext', 'make_build_ctx']
 
@@ -22,9 +23,9 @@ class BuildExecutor:
     must use it in coroutine
     """
     def __init__(self):
-        self.donwload_executor = CoroExecutor(3)
+        self.donwload_executor = CoroExecutor(4)
         self.light_download_executor = CoroExecutor(16)
-        self.heavy_proc_executor = CoroExecutor(1)
+        self.heavy_proc_executor = CoroExecutor(2)
         self.light_proc_executor = CoroExecutor(8)
 
     def run_light_download(self, coro) -> asyncio.Future:
@@ -75,6 +76,7 @@ class BuildContext(BuildExecutor, ResContext):
     def make_config(self, libid:str):
         path = self.path
         config = deepcopy(self._tpl_install_config)
+        config.platform, config.arch = get_sys_info()
         config.install_path = path.install/libid
         config.download_path = path.download/libid
         config.build_path = path.build/libid
@@ -94,6 +96,7 @@ class BuildContext(BuildExecutor, ResContext):
         mgr_path = Path(mgr_path)
         mgr_path.copy_to(path.package, is_prefix=True)
 
+    
 
 
 

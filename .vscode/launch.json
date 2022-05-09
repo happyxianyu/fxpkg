@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/example/main.py",
             "console": "integratedTerminal",
-            "args": ["gflags"],
+            "args": ["gflags", "2.2.2"],
             "justMyCode": true
         },
         {
