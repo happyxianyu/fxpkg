@@ -1,0 +1,14 @@
+{
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.linting.pylintArgs": [
+        "--disable=C,R,W,no-member"
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/inc"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/inc"
+    ]
+}

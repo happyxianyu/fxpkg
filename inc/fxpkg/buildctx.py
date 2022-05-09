@@ -42,7 +42,9 @@ class BuildExecutor:
 
 @dataclass 
 class PathInfoEx(PathInfo):
-    installed:Path = None
+    build:Path = None
+    download:Path = None
+    install:Path = None
     config:Path = None
     package:Path = None
 
@@ -58,11 +60,14 @@ class BuildContext(BuildExecutor, ResContext):
         BuildExecutor.__init__(self)
         path = self.path
         self.path = path = PathInfoEx(
-            installed = path.cache/'installed',
+            build = path.cache/'build',
+            download = path.cache/'download',
+            install = path.cache/'install',
             config = path.data/'config',
             package = path.data/'package',
             **dataclasses.asdict(path)
         )
+        path.create_path()
 
         add_package_path(path.package)
         self._tpl_install_config:InstallConfig = None   # template install config
@@ -70,9 +75,12 @@ class BuildContext(BuildExecutor, ResContext):
     def make_config(self, libid:str):
         path = self.path
         config = deepcopy(self._tpl_install_config)
-        config.install_path = path.cache/'install'/libid
-        config.download_path = path.cache/'download'/libid
-        config.build_path = path.cache/'build'/libid
+        config.install_path = path.install/libid
+        config.download_path = path.download/libid
+        config.build_path = path.build/libid
+        config.install_path.mkdir()
+        config.build_path.mkdir()
+        config.build_path.mkdir()
         config.build_type = 'debug'
         config.version = '2.2.2'
         config.cmake.generator = get_cmake_generator(config)

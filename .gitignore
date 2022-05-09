@@ -6,10 +6,18 @@
 *.tmp.ipynb
 draft*
 
-.vscode*
-.vscode/*
+
 .idea/*
 .pytest_cache/*
+
+
+
+/example/core
+/example/cache
+/example/tmp
+
+
+
 
 
 build/*
