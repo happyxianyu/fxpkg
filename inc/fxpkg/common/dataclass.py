@@ -106,8 +106,8 @@ class InstallEntry(_InstallEntryBase):
     lib_list: list = None
     dll_list: list = None
 
-    dependent: list = None  # 元素是entry_id
-    dependency: list = None # 元素是
+    dependant: list = None  
+    dependency: list = None # element type: InstallEntry
 
     install_state: InstallState = None
     install_type:str = 'common'   # 默认类型，还可以是'ref'，表示安装路径为引用，卸载时将不会删除
