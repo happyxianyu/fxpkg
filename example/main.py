@@ -20,7 +20,7 @@ else:
 # version = '1.78.0'
 
 libid = 'gflags'
-
+version = '2.2.2'
 
 async def main():
     root = Path(__file__).prnt

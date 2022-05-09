@@ -15,6 +15,11 @@ class GflagsMgr(CMakePkgMgr):
 
     async def configure(self, config: InstallConfig = None):
         bctx = self.bctx
+        repo_path = self.repo_path
+        run_shellscript_async = bctx.run_shellscript_async
+        run_light_download = bctx.run_light_download
+        run_heavy_proc = bctx.run_heavy_proc
+        
 
         await super().configure(config)
         

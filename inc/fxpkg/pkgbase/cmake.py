@@ -85,17 +85,18 @@ class CMakePkgMgr(PackageMgrBase):
         repo_path = self.repo_path
 
         bctx = self.bctx
+        run_cmd_async = bctx.run_cmd_async
         run_download = bctx.run_download
         run_shellscript_async = bctx.run_shellscript_async
         run_light_download = bctx.run_light_download
 
         tag = self.version_to_tag(version)
         if not repo_path.exists():
-            await run_download(run_shellscript_async(f'git clone --depth=1 -b {tag} {git_url} {libid}', cwd=repo_path.prnt))
+            await run_download(run_cmd_async(f'git clone --depth=1 -b {tag} {git_url} {libid}', cwd=repo_path.prnt))
             assert repo_path.exists()
         else:   # fetch version and checkout
             await run_light_download(run_shellscript_async(f'''
-git fetch--depth=1 origin +refs/tags/{tag}:refs/tags/{tag}
+git fetch --depth=1 origin +refs/tags/{tag}:refs/tags/{tag}
 git checkout tags/{tag}''', cwd=repo_path))
 
 
