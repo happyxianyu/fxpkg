@@ -1,19 +1,41 @@
-tmp/*
+#BEGIN MY CONFIG 
+**/tmp/*
 *.tmp
 *.tmp.txt
 *.tmp.py
 *.tmp.ipynb
 draft*
-# .env
 
-.vscode*
-.vscode/*
+
+.idea/*
+.pytest_cache/*
+
+
+
+/example/core
+/example/cache
+/example/tmp
+
+
+
+
+
 build/*
-
+/test/log/*
 
 /inc/fxpkg_test/test_cache/*
 
 
+
+!/inc/fxpkg/resource/**/*
+
+/.idea
+/.pytest_cache
+/test/test/log/*
+
+/inc/fxpkg/resource/config.json
+
+#END MY CONFIG
 
 
 
@@ -121,7 +143,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -164,7 +185,3 @@ dmypy.json
 
 
 
-#MY CONFIG
-
-
-!/inc/fxpkg/resource/**/*
