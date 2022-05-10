@@ -23,7 +23,8 @@ class GflagsMgr(CMakePkgMgr):
         run_cmd_async = bctx.run_cmd_async
         run_heavy_proc = bctx.run_heavy_proc
         run_shellscript_async = bctx.run_shellscript_async
-        await run_heavy_proc(run_shellscript_async(f".\\b2 --prefix={install_path} --build-dir={build_path} install > {log_path/'install.txt'}", cwd=repo_path))
+        await run_heavy_proc(run_shellscript_async(
+            f".\\b2 --prefix={install_path.quote} --build-dir={build_path.quote} install > {(log_path/'install.txt').quote}", cwd=repo_path))
 
     async def build(self):
         config = self.config
@@ -35,7 +36,8 @@ class GflagsMgr(CMakePkgMgr):
         run_cmd_async = bctx.run_cmd_async
         run_heavy_proc = bctx.run_heavy_proc
         run_shellscript_async = bctx.run_shellscript_async
-        await run_heavy_proc(run_shellscript_async(f'''.\\b2 --prefix={install_path} --build-dir={build_path} > {log_path/'build.txt'}''', cwd=repo_path))
+        await run_heavy_proc(run_shellscript_async(
+            f'''.\\b2 --prefix={install_path.quote} --build-dir={build_path.quote} > {(log_path/'build.txt').quote}''', cwd=repo_path))
 
 
     async def configure(self):
@@ -47,8 +49,8 @@ class GflagsMgr(CMakePkgMgr):
         run_cmd_async = bctx.run_cmd_async
         run_heavy_proc = bctx.run_heavy_proc
         run_light_proc = bctx.run_light_proc
-        await run_light_proc(run_shellscript_async(f".\\bootstrap.bat > {log_path/'config.txt'}", cwd=repo_path))
-        await run_light_proc(run_shellscript_async(f".\\b2 headers >> {log_path/'config.txt'}", cwd=repo_path))
+        await run_light_proc(run_shellscript_async(f".\\bootstrap.bat > {(log_path/'config.txt').quote}", cwd=repo_path))
+        await run_light_proc(run_shellscript_async(f".\\b2 headers >> {(log_path/'config.txt').quote}", cwd=repo_path))
 
         
     async def download(self, config: InstallConfig = None):

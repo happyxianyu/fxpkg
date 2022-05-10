@@ -1,4 +1,4 @@
-from fxpkg import *
+from fxpkg import BuildContext, InstallConfig, InstallEntry
 from .base import *
 
 
@@ -67,13 +67,21 @@ class GitPkgMgr(PackageMgrBase):
     def version_to_tag(self, version) -> str:
         return version
     
-    async def configure():
+    async def configure(self):
+        config = self.config
+        repo_path = self.repo_path
+        bctx = self.bctx
+        run_light_proc = bctx.run_light_proc
+        run_cmd_async = bctx.run_cmd_async
+        version = config.version
+        tag = self.version_to_tag(version)
+        await run_light_proc(run_cmd_async(f'git checkout tags/{tag}', cwd=repo_path))
+
+
+    async def build(self):
         pass
 
-    async def build():
-        pass
-
-    async def install():
+    async def install(self):
         pass
 
 

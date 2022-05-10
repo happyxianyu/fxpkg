@@ -33,6 +33,33 @@ async def get_msvc_infos(bctx:'BuildContext'):
         return []
         
 
+class MSVCInfoProxy:
+    def __init__(self, msvc_info:dict):
+        self.msvc_info = msvc_info
+
+    def __getitem__(self, i):
+        return self.msvc_info[i]
+    
+    @property
+    def line_version(self) -> str:
+        return self['catalog']['productLineVersion']
+
+    @property
+    def install_version(self) -> str:
+        return self['installationVersion']
+
+    @property
+    def install_path(self) -> Path:
+        return Path(self["installationPath"])
+
+    @property
+    def vcvars64(self) -> Path:
+        return self.install_path/r'VC\Auxiliary\Build\vcvars64.bat'
+
+    @property
+    def vcvarsall(self) -> Path:
+        return self.install_path/r'VC\Auxiliary\Build\vcvarsall.bat'
+
 
 
 

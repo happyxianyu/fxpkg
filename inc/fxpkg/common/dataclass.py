@@ -22,6 +22,9 @@ _default_dict = lambda: dataclasses.field(default_factory=dict)
 class ToolSet:
     msvc_infos:list = dataclasses.field(default_factory=list)
 
+    def choose_msvc(self) -> dict:
+        return self.msvc_infos[0]
+
 
 
 @dataclass

@@ -53,7 +53,7 @@ class CMakePkgMgr(GitPkgMgr):
         run_light_proc = bctx.run_light_proc
         run_cmd_async = bctx.run_cmd_async
         self._set_config(config)
-        await run_light_proc(run_cmd_async(f'cmake --build {build_path} --target install --config {build_type}', cwd=repo_path))
+        await run_light_proc(run_cmd_async(f'cmake --build {build_path.quote} --target install --config {build_type}', cwd=repo_path))
 
 
     async def build(self):
@@ -63,7 +63,7 @@ class CMakePkgMgr(GitPkgMgr):
         bctx = self.bctx
         run_cmd_async = bctx.run_cmd_async
         run_heavy_proc = bctx.run_heavy_proc
-        await run_heavy_proc(run_cmd_async(f'cmake --build {build_path}', cwd=repo_path))
+        await run_heavy_proc(run_cmd_async(f'cmake --build {build_path.quote}', cwd=repo_path))
 
 
     async def configure(self):
@@ -77,11 +77,11 @@ class CMakePkgMgr(GitPkgMgr):
         cmake_presets = make_cmake_presets(config, install_path)
         version = config.version
         tag = self.version_to_tag(version)
-        await run_light_proc(run_cmd_async('git checkout tags/{tag}', cwd=repo_path))
+        await run_light_proc(run_cmd_async(f'git checkout tags/{tag}', cwd=repo_path))
         async with AIOFile(repo_path/'CMakeUserPresets.json', 'w') as fw:
             await fw.write(json.dumps(cmake_presets, ensure_ascii=False, indent=4))
         assert (repo_path/'CMakeUserPresets.json').exists()
-        await run_light_proc(run_cmd_async(f'cmake . -B {build_path} --preset=real', cwd=repo_path))
+        await run_light_proc(run_cmd_async(f'cmake . -B {build_path.quote} --preset=real', cwd=repo_path))
 
 
 

@@ -10,14 +10,15 @@ libid = 'libsodium'
 git_url = 'https://github.com/jedisct1/libsodium.git'
 
 
-class GflagsMgr(PackageMgrBase):
+class LibsodiumMgr(GitPkgMgr):
     def __init__(self, bctx: BuildContext):
-        super().__init__(bctx, libid)
+        super().__init__(bctx, libid, git_url)
 
-
+    async def build(self, bctx):
+        pass
 
         
 def get_package_mgr(bctx:BuildContext):
-    return GflagsMgr(bctx)
+    return LibsodiumMgr(bctx)
 
 

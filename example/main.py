@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import json
 
 from cbutil import *
 from fxpkg import *
@@ -19,8 +20,12 @@ else:
 # libid = 'boost'
 # version = '1.76.0'
 
+# libid = 'libsodium'
+# version = '1.0.17'
+
 libid = 'gflags'
-version = '2.2.1'
+version = '2.2.2'
+
 
 async def main():
     root = Path(__file__).prnt

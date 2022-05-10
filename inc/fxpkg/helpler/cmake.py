@@ -28,7 +28,7 @@ def get_msvc_cmake_generator(msvc_info:dict):
 def get_cmake_generator(config:InstallConfig):
     msvc_infos = config.toolset.msvc_infos
     if len(msvc_infos):
-        msvc_info = config.toolset.msvc_infos[0]
+        msvc_info = config.toolset.choose_msvc()
         return get_msvc_cmake_generator(msvc_info)
 
 
@@ -71,7 +71,8 @@ _begin_stamp = f'begin {_stamp}'
 _end_stamp = f'end {_stamp}'
 
 
-def hook_cmake(cmake_file, hook_content:str):
+def hook_cmake(bctx:'BuildContext', cmake_file, hook_content:str):
+    log = bctx.log
     cmake_file = Path(cmake_file)
     with cmake_file.open('r') as fr:
         content = fr.read()
