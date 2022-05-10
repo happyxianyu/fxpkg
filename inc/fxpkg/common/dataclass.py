@@ -71,6 +71,32 @@ class InstallConfig:
 
 
     cmake:CmakeConfig = CmakeConfig() # info for cmake
+
+    def get_bin_path_ex(self, install_path_ex:Path):
+        return install_path_ex/'bin'
+
+    def get_lib_path_ex(self, install_path_ex:Path):
+        return install_path_ex/'lib'
+
+    def get_include_path_ex(self, install_path_ex:Path):
+        return install_path_ex/'include'
+
+    def get_install_path_ex(self, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+        return self._get_path(self.install_path, version, platform, arch, build_type)
+
+    def get_log_path_ex(self, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+        return self._get_path(self.log_path, version, platform, arch, build_type)
+
+    def _get_path(self, base_path, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+        'return sepcific install path'
+        parts = [version, platform, arch, build_type]
+        default_parts = [self.version, self.platform, self.arch, self.build_type]
+        for i in range(len(parts)):
+            if parts[i] is None:
+                parts[i] = default_parts[i]
+        return base_path.joinpath(*parts)
+
+
     
 
 

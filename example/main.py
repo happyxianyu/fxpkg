@@ -26,6 +26,9 @@ else:
 libid = 'gflags'
 version = '2.2.0'
 
+# libid = 'libsodium'
+# version = '1.0.18'
+
 
 async def main():
     root = Path(__file__).prnt
@@ -33,7 +36,11 @@ async def main():
     mgr = bctx.get_package_mgr(libid)
     config = bctx.make_config(libid)
     config.version = version
-    entry = await mgr.request(config)
+    try:
+        entry = await mgr.request(config)
+    except Exception as e:
+        print(e)
+        exit(-1)
     bctx.log.info(entry)
 
     

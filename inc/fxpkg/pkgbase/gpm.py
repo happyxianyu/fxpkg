@@ -21,8 +21,11 @@ class GitPkgMgr(PackageMgrBase):
 
         self.repo_path = config.download_path
         self.build_path = config.build_path/version/build_type
-        self.install_path = config.install_path/version/build_type
-        self.log_path = config.log_path/version/build_type
+        self.log_path = config.get_log_path_ex()
+        self.install_path = install_path = config.get_install_path_ex()
+        self.lib_path = config.get_lib_path_ex(install_path)
+        self.bin_path = config.get_bin_path_ex(install_path)
+        self.include_path = config.get_include_path_ex(install_path)
 
         self.build_path.mkdir()
         self.install_path.mkdir()

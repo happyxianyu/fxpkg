@@ -9,7 +9,8 @@ if typing.TYPE_CHECKING:
 
 __all__ = [
     'find_vswhere_path',
-    'get_msvc_infos'
+    'get_msvc_infos',
+    'MSVCInfoProxy'
 ]
 
 
