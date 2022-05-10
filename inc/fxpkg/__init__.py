@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-from .fxhost import *
-from .fxport import *
-from .datacls import *
-from .common import FxConfig
-=======
 # import fxpkg.package
 # _tmp = fxpkg.package
 
@@ -32,4 +26,3 @@ del pkgbase
 
 
 
->>>>>>> redesign1

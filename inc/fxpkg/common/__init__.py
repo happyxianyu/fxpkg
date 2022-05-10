@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-from .configclass import *
-=======
 from .constants import *
 from .dataclass import *
 from .types import *
@@ -14,4 +11,3 @@ del types
 del helpler
 
 
->>>>>>> redesign1
