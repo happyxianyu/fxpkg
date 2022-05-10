@@ -16,11 +16,11 @@ if(len(argv)>2):
 else:
     version = None
 
-# libid = 'boost'
-# version = '1.78.0'
+libid = 'boost'
+version = '1.77.0'
 
-libid = 'gflags'
-version = '2.1.1'
+# libid = 'gflags'
+# version = '2.1.1'
 
 async def main():
     root = Path(__file__).prnt
