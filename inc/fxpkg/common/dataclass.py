@@ -58,6 +58,7 @@ class InstallConfig:
     download_path: Path = None
     build_path: Path = None
     tmp_path: Path = None
+    log_path: Path = None
 
     toolset: ToolSet = ToolSet()
     # 环境变量

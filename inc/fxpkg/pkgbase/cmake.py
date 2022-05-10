@@ -23,6 +23,7 @@ class CMakePkgMgr(PackageMgrBase):
         self.repo_path = config.download_path
         self.build_path = (config.build_path/version/build_type).absolute()
         self.install_path = config.install_path/version/build_type
+        self.log_path = config.log_path/version/build_type
 
     async def request(self, config: InstallConfig = None):
         self._set_config(config)

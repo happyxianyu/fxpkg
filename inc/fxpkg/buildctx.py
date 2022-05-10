@@ -82,7 +82,7 @@ class BuildContext(BuildExecutor, ResContext):
         config.build_path = path.build/libid
         config.install_path.mkdir()
         config.build_path.mkdir()
-        config.build_path.mkdir()
+        config.log_path = path.log/libid
         config.build_type = 'debug'
         config.version = '2.2.2'
         config.cmake.generator = get_cmake_generator(config)
