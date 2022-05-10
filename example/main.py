@@ -20,9 +20,6 @@ else:
 # libid = 'boost'
 # version = '1.76.0'
 
-# libid = 'libsodium'
-# version = '1.0.17'
-
 # libid = 'gflags'
 # version = '2.2.0'
 
