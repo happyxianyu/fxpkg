@@ -16,9 +16,34 @@ class LibsodiumMgr(GitPkgMgr):
         super().__init__(bctx, libid, git_url)
     
     async def install(self):
-        pass
+        config = self.config
+        repo_path = self.repo_path
 
-    
+        build_type = config.build_type
+        platform = config.platform
+        arch = config.arch
+
+        include_path = self.include_path
+        lib_path = self.lib_path
+        bin_path = self.bin_path
+
+        # get toolset
+        line_version = self.msvc_info_proxy.line_version
+        vcxproj_path = repo_path/f'builds\\msvc\\vs{line_version}\\libsodium\\libsodium.vcxproj'
+        async with AIOFile(vcxproj_path) as fr:
+            content = await fr.read()
+        parser = VCXProjParser(content)
+        vc_toolset = parser.get_platform_toolset('Globals')
+        include_path_src = repo_path/'src/libsodium/include'
+
+        msvc_path_helpler = MSVCPathHelpler(repo_path/'bin')
+        dll_path_src = msvc_path_helpler.get_dll_path(platform, arch, build_type, vc_toolset)
+        lib_path_src = msvc_path_helpler.get_lib_path(platform, arch, build_type, vc_toolset)
+
+        include_path_src.copy_sons_to(include_path)
+        dll_path_src.copy_sons_to(bin_path)
+        lib_path_src.copy_sons_to(lib_path)
+
 
     async def build(self):
         log_path = self.log_path
@@ -27,7 +52,7 @@ class LibsodiumMgr(GitPkgMgr):
         bctx = self.bctx
         run_heavy_proc = bctx.run_heavy_proc
         run_shellscript_async = bctx.run_shellscript_async
-        msvc_info_proxy = MSVCInfoProxy(config.toolset.choose_msvc())
+        self.msvc_info_proxy = msvc_info_proxy = MSVCInfoProxy(config.toolset.choose_msvc())
         # use buildall.bat and buildbase.bat to build
         build_tool_path = repo_path/r'builds\msvc\build'
         # get the command line we want
@@ -68,6 +93,15 @@ SET my_environment={msvc_info_proxy.vcvarsall.quote}
                 content = content.replace('!environment!', '!my_environment!')
                 content = content.replace('%environment%', '!my_environment!')
                 await f.write(content)
+
+
+    def set_config(self, config: 'InstallConfig'):
+        super().set_config(config)
+        install_path = config.get_install_path_ex(config.version, config.platform, config.arch, config.build_type)
+        self.include_path = config.get_include_path_ex(install_path)
+        self.bin_path = config.get_bin_path_ex(install_path)
+        self.lib_path = config.get_lib_path_ex(install_path)
+
 
 
         

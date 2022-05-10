@@ -52,8 +52,8 @@ class InstallConfig:
     install_path: Path = None  # 对于非DIRECT类型的安装，安装不可超出该目录
     # 以下为建议安装目录
     include_path: Path = None
-    lib_path: Path = None
-    bin_path: Path = None   # dll path
+    bin_path: Path = None   # .lib
+    lib_path: Path = None   # .dll and other binary files
     cmake_path: Path = None
 
     data_path: Path = None  # 该目录下的所有文件将持久保存
@@ -81,19 +81,15 @@ class InstallConfig:
     def get_include_path_ex(self, install_path_ex:Path):
         return install_path_ex/'include'
 
-    def get_install_path_ex(self, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+    def get_install_path_ex(self, version:str = '', platform:str = '', arch:str = '', build_type:str = ''):
         return self._get_path(self.install_path, version, platform, arch, build_type)
 
-    def get_log_path_ex(self, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+    def get_log_path_ex(self, version:str = '', platform:str = '', arch:str = '', build_type:str = ''):
         return self._get_path(self.log_path, version, platform, arch, build_type)
 
-    def _get_path(self, base_path, version:str = None, platform:str = None, arch:str = None, build_type:str = None):
+    def _get_path(self, base_path, version:str = '', platform:str = '', arch:str = '', build_type:str = ''):
         'return sepcific install path'
         parts = [version, platform, arch, build_type]
-        default_parts = [self.version, self.platform, self.arch, self.build_type]
-        for i in range(len(parts)):
-            if parts[i] is None:
-                parts[i] = default_parts[i]
         return base_path.joinpath(*parts)
 
 

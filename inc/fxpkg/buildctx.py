@@ -13,7 +13,6 @@ from fxpkg.common import *
 from .core import *
 if typing.TYPE_CHECKING:
     from .pkgbase.base import PackageMgrBase
-import platform
 
 __all__ = ['BuildContext', 'make_build_ctx']
 

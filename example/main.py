@@ -23,11 +23,11 @@ else:
 # libid = 'libsodium'
 # version = '1.0.17'
 
-libid = 'gflags'
-version = '2.2.0'
+# libid = 'gflags'
+# version = '2.2.0'
 
-# libid = 'libsodium'
-# version = '1.0.18'
+libid = 'libsodium'
+version = '1.0.18'
 
 
 async def main():
@@ -39,7 +39,7 @@ async def main():
     try:
         entry = await mgr.request(config)
     except Exception as e:
-        print(e)
+        print(type(e), e)
         exit(-1)
     bctx.log.info(entry)
 

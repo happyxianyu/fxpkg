@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/example/main.py",
             "console": "integratedTerminal",
             "args": ["gflags", "2.2.2"],
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Python: current justMyCode",

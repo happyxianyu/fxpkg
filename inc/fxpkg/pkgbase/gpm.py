@@ -20,9 +20,9 @@ class GitPkgMgr(PackageMgrBase):
         version = config.version
 
         self.repo_path = config.download_path
-        self.build_path = config.build_path/version/build_type
-        self.log_path = config.get_log_path_ex()
-        self.install_path = install_path = config.get_install_path_ex()
+        self.build_path = config.build_path/version
+        self.log_path = config.get_log_path_ex(version=version)
+        self.install_path = install_path = config.get_install_path_ex(version=version)
         self.lib_path = config.get_lib_path_ex(install_path)
         self.bin_path = config.get_bin_path_ex(install_path)
         self.include_path = config.get_include_path_ex(install_path)
@@ -41,11 +41,20 @@ class GitPkgMgr(PackageMgrBase):
             config = self.config
             libid = self.libid
             git_url = self.git_url
-            build_type = config.build_type
+
             version = config.version
+            build_type = config.build_type
+            platform = config.platform
+            arch = config.arch
+
             repo_path = self.repo_path
             build_path = self.build_path
             install_path = self.install_path
+
+            include_path = self.include_path
+            lib_path = self.lib_path
+            bin_path = self.bin_path
+
             bctx = self.bctx
             run_light_proc = bctx.run_light_proc
             run_cmd_async = bctx.run_cmd_async
@@ -114,9 +123,11 @@ class GitPkgMgr(PackageMgrBase):
         config = self.config
         install_path = self.install_path
         install_entry = InstallEntry()
+
         install_entry.install_path = install_path
         install_entry.include_path = install_path/'include'
         install_entry.lib_path = install_path/'lib'
         install_entry.cmake_path = install_path/'lib/cmake'
+        
         return install_entry
 
