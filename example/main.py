@@ -24,7 +24,7 @@ else:
 # version = '1.0.17'
 
 libid = 'gflags'
-version = '2.2.2'
+version = '2.2.0'
 
 
 async def main():

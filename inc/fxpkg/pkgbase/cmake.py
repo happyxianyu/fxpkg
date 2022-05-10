@@ -67,6 +67,7 @@ class CMakePkgMgr(GitPkgMgr):
 
 
     async def configure(self):
+        await super().configure()
         config = self.config
         repo_path = self.repo_path
         build_path = self.build_path
@@ -77,7 +78,6 @@ class CMakePkgMgr(GitPkgMgr):
         cmake_presets = make_cmake_presets(config, install_path)
         version = config.version
         tag = self.version_to_tag(version)
-        await run_light_proc(run_cmd_async(f'git checkout tags/{tag}', cwd=repo_path))
         async with AIOFile(repo_path/'CMakeUserPresets.json', 'w') as fw:
             await fw.write(json.dumps(cmake_presets, ensure_ascii=False, indent=4))
         assert (repo_path/'CMakeUserPresets.json').exists()
