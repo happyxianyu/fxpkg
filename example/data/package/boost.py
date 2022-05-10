@@ -13,7 +13,7 @@ class GflagsMgr(CMakePkgMgr):
     def version_to_tag(self, version) -> str:
         return f'boost-{version}'
 
-    async def install(self, config: InstallConfig = None):
+    async def install(self):
         self._set_config(config)
         config = self.config
         bctx = self.bctx
@@ -26,7 +26,7 @@ class GflagsMgr(CMakePkgMgr):
         run_shellscript_async = bctx.run_shellscript_async
         await run_heavy_proc(run_shellscript_async(f".\\b2 --prefix={install_path} --build-dir={build_path} install > {log_path/'install.txt'}", cwd=repo_path))
 
-    async def build(self, config: InstallConfig = None):
+    async def build(self):
         self._set_config(config)
         config = self.config
         bctx = self.bctx
@@ -40,7 +40,7 @@ class GflagsMgr(CMakePkgMgr):
         await run_heavy_proc(run_shellscript_async(f'''.\\b2 --prefix={install_path} --build-dir={build_path} > {log_path/'build.txt'}''', cwd=repo_path))
 
 
-    async def configure(self, config: InstallConfig = None):
+    async def configure(self):
         self._set_config(config)
         config = self.config
         bctx = self.bctx
