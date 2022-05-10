@@ -3,10 +3,10 @@ from aiofile import AIOFile
 from fxpkg.common import *
 from fxpkg.helpler import *
 from fxpkg.buildctx import *
-from .base import *
+from .gpm import *
 
 
-class CMakePkgMgr(PackageMgr):
+class CMakePkgMgr(GitPkgMgr):
     def __init__(self, bctx: BuildContext, libid: str, git_url=None):
         super().__init__(bctx, libid, git_url)
 
