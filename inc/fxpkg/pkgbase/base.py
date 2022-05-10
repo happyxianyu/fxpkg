@@ -1,5 +1,5 @@
 import typing
-from fxpkg import InstallConfig, InstallEntry
+from fxpkg import InstallConfig, InstallEntry, BuildContext
 
 __all__ = ['PackageMgrBase', 'PackageMgr']
 
@@ -18,6 +18,14 @@ class PackageMgrBase:
 
 
 class PackageMgr(PackageMgrBase):
+    def __init__(self, bctx: BuildContext, libid: str, git_url=None):
+        if git_url is None:
+            git_url = f'https://github.com/{libid}/{libid}.git'
+
+        self.bctx = bctx
+        self.libid = libid
+        self.git_url = git_url
+
     def set_config(self, config: 'InstallConfig'):
         self.config = config
         build_type = config.build_type
@@ -37,8 +45,48 @@ class PackageMgr(PackageMgrBase):
         if config is not None:
             self.set_config(config)
 
+    async def request(self, config: InstallConfig = None):
+            self._set_config(config)
+            config = self.config
+            libid = self.libid
+            git_url = self.git_url
+            build_type = config.build_type
+            version = config.version
+            repo_path = self.repo_path
+            build_path = self.build_path
+            install_path = self.install_path
+            bctx = self.bctx
+            run_light_proc = bctx.run_light_proc
+            run_cmd_async = bctx.run_cmd_async
+            run_heavy_proc = bctx.run_heavy_proc
+
+            for p in (build_path, install_path):
+                p.mkdir()
+
+            # download
+            await self.download()
+
+            # configure
+            await self.configure()
+
+            # build
+            await self.build()
+
+            # install
+            await self.install()
+            return self.get_install_entry()
+
     def version_to_tag(self, version) -> str:
         return version
+    
+    async def configure():
+        pass
+
+    async def build():
+        pass
+
+    async def install():
+        pass
 
 
     async def download(self, config: 'InstallConfig' = None):

@@ -8,12 +8,7 @@ from .base import *
 
 class CMakePkgMgr(PackageMgr):
     def __init__(self, bctx: BuildContext, libid: str, git_url=None):
-        if git_url is None:
-            git_url = f'https://github.com/{libid}/{libid}.git'
-
-        self.bctx = bctx
-        self.libid = libid
-        self.git_url = git_url
+        super().__init__(bctx, libid, git_url)
 
     async def request(self, config: InstallConfig = None):
         self._set_config(config)

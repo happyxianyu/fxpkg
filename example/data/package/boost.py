@@ -14,7 +14,6 @@ class GflagsMgr(CMakePkgMgr):
         return f'boost-{version}'
 
     async def install(self):
-        self._set_config(config)
         config = self.config
         bctx = self.bctx
         repo_path = self.repo_path
@@ -27,7 +26,6 @@ class GflagsMgr(CMakePkgMgr):
         await run_heavy_proc(run_shellscript_async(f".\\b2 --prefix={install_path} --build-dir={build_path} install > {log_path/'install.txt'}", cwd=repo_path))
 
     async def build(self):
-        self._set_config(config)
         config = self.config
         bctx = self.bctx
         repo_path = self.repo_path
@@ -41,7 +39,6 @@ class GflagsMgr(CMakePkgMgr):
 
 
     async def configure(self):
-        self._set_config(config)
         config = self.config
         bctx = self.bctx
         repo_path = self.repo_path
