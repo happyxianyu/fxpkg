@@ -5,7 +5,7 @@
 *.tmp.py
 *.tmp.ipynb
 draft*
-
+/tmp
 
 .idea/*
 .pytest_cache/*
