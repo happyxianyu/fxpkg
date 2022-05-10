@@ -17,7 +17,7 @@ else:
     version = None
 
 libid = 'boost'
-version = '1.77.0'
+version = '1.76.0'
 
 # libid = 'gflags'
 # version = '2.1.1'
